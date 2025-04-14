@@ -7,9 +7,9 @@ class ControladorLogin:
         self.__tela_login = TelaLogin()
 
     def autenticar_usuario(self, username: str, password: str) -> bool:
-        usuario = self.__sistema.controlador_caminhoneiro.get_by_usuario(username)
+        usuario = self.__sistema.controlador_caminhoneiro.procura_caminhoneiro(username)
         if not usuario:
-            usuario = self.__sistema.controlador_gerente.get_by_usuario(username)
+            usuario = self.__sistema.controlador_gerente.procura_gerente(username)
         
         if usuario and Login.authenticate(usuario, password, self.__sistema.sessao):
             return True
