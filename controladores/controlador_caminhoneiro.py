@@ -23,6 +23,10 @@ class ControladorCaminhoneiro:
         try:
             if dados["nome"] == "" or dados["cpf"] == "":
                 raise KeyError("Nome ou CPF vazios")
+            
+            cria_id = len(self.lista_caminhoneiros) 
+            while self.procura_caminhoneiro(cria_id) is not None:
+                cria_id += 1
 
             novo_caminhoneiro = Caminhoneiro(
                 usuario=dados["usuario"],
@@ -34,6 +38,7 @@ class ControladorCaminhoneiro:
                 num_cnh=int(dados["num_cnh"]),
                 cat_cnh=dados["cat_cnh"],
                 possui_MOPP=bool(dados["possui_MOPP"]),
+                id=cria_id,
             )
 
             self.__caminhoneiro_dao.add(novo_caminhoneiro)
