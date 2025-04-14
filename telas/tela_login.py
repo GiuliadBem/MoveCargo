@@ -6,11 +6,31 @@ class TelaLogin:
         self.__window = None
 
     def abre_tela(self):
+        style = {
+            "titleSize": (8,1),
+            "inputSize": (26,1)
+        }
+
+        blankLine = [sg.Text("", size=(1,1))]
+
         layout = [
-            [sg.Text("Usuário:"), sg.Input(key="username")],
-            [sg.Text("Senha:"), sg.Input(password_char="*", key="password")],
-            [sg.Button("Entrar"), sg.Button("Cancelar")],
-            [sg.Text("", size=(30, 1), key="mensagem", text_color="red")]
+            [
+                sg.Text("Usuário:", size=style["titleSize"]), 
+                sg.Input(key="username", size=style["inputSize"])
+            ],
+            [
+                sg.Text("Senha:", size=(8,1)), 
+                sg.Input(password_char="*", key="password", size=style["inputSize"])
+            ],
+            [
+                sg.Text("", size=(30, 1), key="mensagem", text_color="red")
+            ],
+            [
+                sg.Push(),  # pushes next elements to center
+                sg.Button("Entrar"), 
+                sg.Button("Cancelar"),
+                sg.Push()   # pushes back to center from other side
+            ],
         ]
         self.__window = sg.Window("Login", layout)
 
