@@ -6,10 +6,10 @@ class CaminhoneiroDAO(DAO):
         super().__init__("caminhoneiro.pkl")
 
     def add(self, caminhoneiro: Caminhoneiro):
-        super().add(caminhoneiro.id, caminhoneiro)
+        super().add(caminhoneiro.usuario, caminhoneiro)
 
     def update(self, caminhoneiro: Caminhoneiro):
-        super().update(caminhoneiro.id, caminhoneiro)
+        super().update(caminhoneiro.usuario, caminhoneiro)
 
     def get(self, chave: int):
         return super().get(chave)

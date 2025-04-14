@@ -3,7 +3,7 @@ from modelos.caminhoneiro import Caminhoneiro
 from daos.caminhoneiro_dao import CaminhoneiroDAO
 
 class ControladorCaminhoneiro:
-    def _init_(self, controlador_sistema):
+    def __init__(self, controlador_sistema):
         self.__caminhoneiro_dao = CaminhoneiroDAO()
         self.__tela_caminhoneiro = TelaCaminhoneiro()
         self.__controlador_sistema = controlador_sistema
@@ -12,9 +12,9 @@ class ControladorCaminhoneiro:
     def lista_caminhoneiros(self):
         return self.__caminhoneiro_dao.get_all()
 
-    def procura_caminhoneiro(self, id):
+    def procura_caminhoneiro(self, usuario):
         for caminhoneiro in self.lista_caminhoneiros:
-            if caminhoneiro.id == id:
+            if caminhoneiro.usuario == usuario:
                 return caminhoneiro
         return None
 
@@ -23,10 +23,6 @@ class ControladorCaminhoneiro:
         try:
             if dados["nome"] == "" or dados["cpf"] == "":
                 raise KeyError("Nome ou CPF vazios")
-
-            cria_id = len(self.lista_caminhoneiros)
-            while self.procura_caminhoneiro(cria_id) is not None:
-                cria_id += 1
 
             novo_caminhoneiro = Caminhoneiro(
                 usuario=dados["usuario"],
@@ -38,7 +34,6 @@ class ControladorCaminhoneiro:
                 num_cnh=int(dados["num_cnh"]),
                 cat_cnh=dados["cat_cnh"],
                 possui_MOPP=bool(dados["possui_MOPP"]),
-                id=cria_id
             )
 
             self.__caminhoneiro_dao.add(novo_caminhoneiro)
