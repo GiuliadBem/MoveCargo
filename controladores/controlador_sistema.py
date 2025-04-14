@@ -1,4 +1,4 @@
-from controlador_caminhao import ControladorCaminhao
+from controladores.controlador_caminhao import ControladorCaminhao
 
 class ControladorSistema:
     def __init__(self):

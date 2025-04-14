@@ -4,6 +4,10 @@ class DAO:
     def __init__(self, nome_do_arquivo):
         self.__nome_do_arquivo = nome_do_arquivo
         self.__dados = {}
+        try:
+            self.__load()
+        except FileNotFoundError:
+            self.__dump()
 
     def __dump(self):
         pickle.dump(self.__dados, open(self.__nome_do_arquivo, "wb"))

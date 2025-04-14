@@ -1,9 +1,9 @@
-from dao import DAO
+from daos.dao import DAO
 from modelos.caminhao import Caminhao
 
 class CaminhaoDAO(DAO):
     def __init__(self):
-        super().add("caminhao.pkl")
+        super().__init__("caminhao.pkl")
 
     def add(self, caminhao: Caminhao):
         super().add(caminhao.id, caminhao)
