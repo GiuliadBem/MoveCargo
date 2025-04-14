@@ -43,7 +43,11 @@ class ControladorSistema:
 
     def iniciar_sistema(self):
         print("Iniciando sistema...")
-        while (self.__sessao.usuario_atual == None):
-            self.__controlador_login.iniciar_login()
-        
-        print(f"Login realizado com sucesso para o usuário: ${self.__sessao.usuario_atual.usuario}")
+
+        # Solicitar login do usuário
+        self.__controlador_login.iniciar_login()
+
+        if (self.__sessao.usuario_atual == None):
+            print("O sistema foi encerrado pelo usuário")
+        else:
+            print(f"Login realizado com sucesso para o usuário: ${self.__sessao.usuario_atual.usuario}")

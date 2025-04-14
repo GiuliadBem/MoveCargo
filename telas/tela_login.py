@@ -31,6 +31,3 @@ class TelaLogin:
 
     def fechar(self):
         self.__window.close() # type: ignore
-
-telaLogin = TelaLogin()
-print(str(telaLogin.mostra_tela()))
