@@ -1,4 +1,4 @@
-import FreeSimpleGUI as sg
+import FreeSimpleGUI as sg # type: ignore
 
 class TelaLogin:
     def __init__(self):
@@ -11,8 +11,6 @@ class TelaLogin:
             "inputSize": (26,1)
         }
 
-        blankLine = [sg.Text("", size=(1,1))]
-
         layout = [
             [
                 sg.Text("Usuário:", size=style["titleSize"]), 
@@ -23,13 +21,15 @@ class TelaLogin:
                 sg.Input(password_char="*", key="password", size=style["inputSize"])
             ],
             [
-                sg.Text("", size=(30, 1), key="mensagem", text_color="red")
+                sg.Push(),
+                sg.Text("", key="mensagem", text_color="red"),
+                sg.Push()
             ],
             [
-                sg.Push(),  # pushes next elements to center
+                sg.Push(),
                 sg.Button("Entrar"), 
                 sg.Button("Cancelar"),
-                sg.Push()   # pushes back to center from other side
+                sg.Push()
             ],
         ]
         self.__window = sg.Window("Login", layout)
@@ -37,14 +37,25 @@ class TelaLogin:
     def mostra_tela(self):
         if not self.__window:
             self.abre_tela()
+
         while True:
-            event, values = self.__window.read() # type: ignore
-            if event == sg.WINDOW_CLOSED or event == "Cancelar":
-                break
+            event, values = self.__window.read()  # type: ignore
+
+            # Exit on close or cancel
+            if event in (sg.WINDOW_CLOSED, "Cancelar"):
+                self.fechar()
+                return None, None
+
+            # Attempt login
             if event == "Entrar":
-                return values["username"], values["password"]
-        self.__window.close()
-        return None, None
+                username = values["username"].strip()
+                password = values["password"].strip()
+
+                # Basic validation (non-empty fields)
+                if username and password:
+                    return username, password
+                else:
+                    self.mostrar_mensagem("Usuário e senha são obrigatórios!")
 
     def mostrar_mensagem(self, msg: str):
         self.__window["mensagem"].update(msg) # type: ignore

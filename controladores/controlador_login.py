@@ -8,8 +8,8 @@ class ControladorLogin:
 
     def autenticar_usuario(self, username: str, password: str) -> bool:
         usuario = self.__sistema.controlador_caminhoneiro.procura_caminhoneiro(username)
-        if not usuario:
-            usuario = self.__sistema.controlador_gerente.procura_gerente(username)
+        """ if not usuario:
+            usuario = self.__sistema.controlador_gerente.procura_gerente(username) """
         
         if usuario and Login.authenticate(usuario, password, self.__sistema.sessao):
             return True
@@ -18,11 +18,11 @@ class ControladorLogin:
     def iniciar_login(self):
         username, password = self.__tela_login.mostra_tela()
         if username is None or password is None:
-            return False  # User canceled or closed the window
+            return "Canceled"
         
         if self.autenticar_usuario(username, password):
             self.__tela_login.fechar()
-            return True
+            return "Success"
         else:
             self.__tela_login.mostrar_mensagem("Usuário ou senha inválidos.")
-            return False
+            return "Fail"
