@@ -46,12 +46,34 @@ class ControladorCaminhoneiro:
         except (KeyError, ValueError) as erro:
             self.__tela_caminhoneiro.mostrar_mensagem(f"Erro ao cadastrar caminhoneiro: {erro}")
     
+
+    def listar_caminhoneiros(self):
+        if not self.lista_caminhoneiros:
+            self.__tela_caminhoneiro.mostrar_mensagem("Nenhum caminhoneiro cadastrado.")
+            return
+
+        dados_exibicao = []
+        for c in self.lista_caminhoneiros:
+            dados_exibicao.append({
+                "id": c.id,
+                "nome": c.nome,
+                "cpf": c.cpf,
+                "telefone": c.telefone,
+                "email": c.email,
+                "numero CNH": c.num_cnh,
+                "categoria CNH": c.cat_cnh,
+                "MOPP": "Sim" if c.possui_MOPP else "Não"
+            })
+        self.__tela_caminhoneiro.mostrar_caminhoneiros(dados_exibicao)
+     
+    
     def retornar(self):
         self.__controlador_sistema.abre_tela()
     
     def abre_tela(self):
         opcoes = {
             1: self.incluir_caminhoneiro,
+            2: self.listar_caminhoneiros,
             0: self.retornar
         }
 

@@ -9,6 +9,7 @@ class TelaCaminhoneiro:
             layout = [
                 [sg.Text("CAMINHONEIROS", font=("Arial", 14), justification='center', expand_x=True)],
                 [sg.Button("Cadastrar Caminhoneiro", size=(25, 1), key=1)],
+                [sg.Button("Listar Caminhoneiros", size=(25, 1), key=2)],
                 [sg.Button("Retornar ao Menu Principal", size=(25, 1), key=0)],
             ]
 
@@ -45,6 +46,35 @@ class TelaCaminhoneiro:
                 elif evento == "Confirmar":
                     janela.close()
                     return valores
+    
+    def mostrar_caminhoneiros(self, lista_caminhoneiros: list[dict]):
+
+        layout = [
+            [sg.Text("Lista de Caminhoneiros", font=("Arial", 14), justification="center", expand_x=True)],
+            [sg.Text("Abaixo estão os caminhoneiros cadastrados:")]
+        ]
+
+        for caminhoneiro in lista_caminhoneiros:
+            linha = (
+                f"ID: {caminhoneiro['id']} | "
+                f"Nome: {caminhoneiro['nome']} | "
+                f"CPF: {caminhoneiro['cpf']} | "
+                f"Telefone: {caminhoneiro['telefone']} | "
+                f"E-mail: {caminhoneiro['email']} | "
+                f"CNH: {caminhoneiro['numero CNH']} ({caminhoneiro['categoria CNH']}) | "
+                f"MOPP: {caminhoneiro['MOPP']}"
+            )
+            layout.append([sg.Text(linha)])
+
+        layout.append([sg.Button("Fechar")])
+        janela = sg.Window("Caminhoneiros Cadastrados", layout)
+
+        while True:
+            evento, _ = janela.read()
+            if evento in (sg.WINDOW_CLOSED, "Fechar"):
+                break
+
+        janela.close()
 
     def mostrar_mensagem(self, msg: str):
         sg.popup(msg, title="Aviso")

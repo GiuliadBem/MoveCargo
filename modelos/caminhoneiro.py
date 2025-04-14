@@ -19,7 +19,7 @@ class Caminhoneiro(Pessoa):
         self.__notificacoes = []
 
 
-    # Validação de CPF
+    # Validação de CPF -> CONTROLADOR(NÃO FAZ SENTIDO SER NO SETTER)
     def validar_cpf(cpf: int):
         cpf_str = str(cpf)
 
