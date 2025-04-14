@@ -47,7 +47,11 @@ class ControladorSistema:
         # Solicitar login do usuário
         self.__controlador_login.iniciar_login()
 
+        # Cancelamento na tela de login
         if (self.__sessao.usuario_atual == None):
             print("O sistema foi encerrado pelo usuário")
-        else:
-            print(f"Login realizado com sucesso para o usuário: ${self.__sessao.usuario_atual.usuario}")
+            return
+        
+        # Fluxo do programa
+        usuario = self.__sessao.usuario_atual
+        print(f"Login realizado com sucesso para o usuário: {usuario.nome}")
