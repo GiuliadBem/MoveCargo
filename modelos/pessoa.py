@@ -3,7 +3,7 @@ import hashlib
 
 class Pessoa(ABC):
     def __init__(self, usuario: str, senha: str):
-        self.__usuario = usuario
+        self.__usuario = usuario.lower()
         self.__senha = self.__hash_senha(senha)
     
     # Getters

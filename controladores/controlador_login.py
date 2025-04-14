@@ -8,8 +8,8 @@ class ControladorLogin:
 
     def autenticar_usuario(self, username: str, password: str) -> bool:
         usuario = self.__sistema.controlador_caminhoneiro.procura_caminhoneiro(username)
-        """ if not usuario:
-            usuario = self.__sistema.controlador_gerente.procura_gerente(username) """
+        if not usuario:
+            usuario = self.__sistema.controlador_gerente.gerente
         
         if usuario and Login.authenticate(usuario, password, self.__sistema.sessao):
             return True

@@ -9,7 +9,7 @@ class ControladorSistema:
     def __init__(self):
         self.__controlador_caminhao = ControladorCaminhao()
         self.__controlador_caminhoneiro = ControladorCaminhoneiro(self)
-        self.__controlador_gerente = ControladorGerente()
+        self.__controlador_gerente = ControladorGerente(self)
         self.__controlador_login = ControladorLogin(self)
         self.__sessao = Sessao()
 
@@ -44,7 +44,8 @@ class ControladorSistema:
     def iniciar_sistema(self):
         # Solicitar login do usuário
         while True:
-            if (self.__controlador_login.iniciar_login() != "Fail"): break
+            autenticacao = self.__controlador_login.iniciar_login()
+            if (autenticacao != "Fail"): break
         
         # Fluxo do programa
         print(f"Login realizado com sucesso para o usuário: {self.__sessao.usuario_atual.nome}") # type: ignore
