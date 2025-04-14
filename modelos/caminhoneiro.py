@@ -2,11 +2,12 @@ from modelos.pessoa import Pessoa
 
 class Caminhoneiro(Pessoa):
     def __init__(
-        self, usuario: str, senha: str,
+        self, id: int, usuario: str, senha: str,
         nome: str, cpf: int, telefone: int, email: str,
         num_cnh: int, cat_cnh: str, possui_MOPP: bool,
     ):
         super().__init__(usuario, senha)
+        self.__id = id
         self.__nome = nome
         self.__cpf = cpf
         self.__telefone = telefone
@@ -16,7 +17,6 @@ class Caminhoneiro(Pessoa):
         self.__possui_MOPP = possui_MOPP
         self.__freteAtual = None
         self.__notificacoes = []
-
 
 
     # Validação de CPF
