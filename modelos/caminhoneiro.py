@@ -1,13 +1,12 @@
-from pessoa import Pessoa
+from modelos.pessoa import Pessoa
 
 class Caminhoneiro(Pessoa):
     def __init__(
-        self, id: int, usuario: str, senha: str,
+        self, usuario: str, senha: str,
         nome: str, cpf: int, telefone: int, email: str,
         num_cnh: int, cat_cnh: str, possui_MOPP: bool,
     ):
         super().__init__(usuario, senha)
-        self.__id = id
         self.__nome = nome
         self.__cpf = cpf
         self.__telefone = telefone
