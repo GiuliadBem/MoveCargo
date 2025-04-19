@@ -1,4 +1,5 @@
-from telas.tela_cadastro_caminhoneiro import TelaCaminhoneiro
+from telas.tela_cadastro_caminhoneiro import TelaCadastroCaminhoneiro
+from telas.tela_caminhoneiro import TelaCaminhoneiro
 from modelos.caminhoneiro import Caminhoneiro
 from daos.caminhoneiro_dao import CaminhoneiroDAO
 
@@ -6,6 +7,7 @@ class ControladorCaminhoneiro:
     def __init__(self, controlador_sistema):
         self.__caminhoneiro_dao = CaminhoneiroDAO()
         self.__tela_caminhoneiro = TelaCaminhoneiro()
+        self.__tela_cadastro_caminhoneiro = TelaCadastroCaminhoneiro()
         self.__controlador_sistema = controlador_sistema
 
     @property
@@ -19,7 +21,7 @@ class ControladorCaminhoneiro:
         return None
 
     def incluir_caminhoneiro(self):
-        dados = self.__tela_caminhoneiro.pega_dados_caminhoneiro()
+        dados = self.__tela_cadastro_caminhoneiro.pega_dados_caminhoneiro()
         try:
             if dados["nome"] == "" or dados["cpf"] == "":
                 raise KeyError("Nome ou CPF vazios")
@@ -48,39 +50,33 @@ class ControladorCaminhoneiro:
     
 
     def listar_caminhoneiros(self):
-        if not self.lista_caminhoneiros:
-            self.__tela_caminhoneiro.mostrar_mensagem("Nenhum caminhoneiro cadastrado.")
-            return
-
         dados_exibicao = []
         for c in self.lista_caminhoneiros:
             dados_exibicao.append({
                 "id": c.id,
                 "nome": c.nome,
-                "cpf": c.cpf,
-                "telefone": c.telefone,
-                "email": c.email,
-                "numero CNH": c.num_cnh,
-                "categoria CNH": c.cat_cnh,
                 "MOPP": "Sim" if c.possui_MOPP else "Não"
+                # "frete": c.frete if hasattr(c, 'frete') else "-"  # incluir futuramente
             })
-        self.__tela_caminhoneiro.mostrar_caminhoneiros(dados_exibicao)
-     
+        return self.__tela_caminhoneiro.mostrar_caminhoneiros(dados_exibicao)
+
     
     def retornar(self):
         self.__controlador_sistema.abre_tela()
     
-    def abre_tela(self):
-        opcoes = {
-            1: self.incluir_caminhoneiro,
-            2: self.listar_caminhoneiros,
-            0: self.retornar
-        }
-
+    def opcoes_caminhoneiro(self):
         while True:
-            opcao = self.__tela_caminhoneiro.tela_opcoes()
-            acao = opcoes.get(opcao)
-            if acao:
-                acao()
+            opcao = self.listar_caminhoneiros()
+            print(opcao)
+
+            if opcao == "cadastrar":
+                self.incluir_caminhoneiro()
+            elif opcao == "atualizar":
+                self.atualizar_caminhoneiro()
+            elif opcao == "excluir":
+                self.excluir_caminhoneiro()
+            elif opcao == "voltar":
+                self.__controlador_sistema.abre_tela()
+                break
             else:
                 self.__tela_caminhoneiro.mostrar_mensagem("Opção inválida. Tente novamente.")
