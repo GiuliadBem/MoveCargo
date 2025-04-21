@@ -1,28 +1,78 @@
-from daos.caminhao_dao import CaminhaoDAO
+from telas.tela_cadastro_caminhao import TelaCadastroCaminhao
+from telas.tela_caminhao import TelaCaminhao
 from modelos.caminhao import Caminhao
+from daos.caminhao_dao import CaminhaoDAO
 
 class ControladorCaminhao:
-    def __init__(self):
+    def __init__(self, controlador_sistema):
         self.__caminhao_dao = CaminhaoDAO()
-        self.add_caminhao()
+        self.__tela_caminhao = TelaCaminhao()
+        self.__tela_cadastro_caminhao = TelaCadastroCaminhao()
+        self.__controlador_sistema = controlador_sistema
 
-    def add_caminhao(self):
-        dados_caminhao = {
-            "id": 1,  # você pode gerar um ID único
-            "placa": "ABC1234",  # formato padrão de placa
-            "modelo": "FH 540",  # exemplo de modelo Volvo
-            "marca": "Volvo",    # exemplo de marca
-            "ano": 2023,         # ano do caminhão
-            "capacidade": 40.0,  # capacidade em toneladas
-            "tipo_carga": "SOLIDO"  # deve ser um dos valores: SOLIDO, LIQUIDO, GASOSO, VIVA
-        }
+    @property
+    def lista_caminhoes(self):
+        return self.__caminhao_dao.get_all()
+    
+    def procura_caminhao(self, id):
+        for caminhao in self.lista_caminhoes:
+            if caminhao.id == id:
+                return caminhao
+        return None
+    
+    def incluir_caminhao(self):
+        dados = self.__tela_cadastro_caminhao.pega_dados_caminhao()
+        try:
+            if dados["placa"] == "" or dados["modelo"] == "" or dados["capacidade"] == "" or dados["tipo_carga"] == "":
+                raise KeyError("Campos obrigatórios não preenchidos")
+            
+            cria_id = len(self.lista_caminhoes)
 
-        novo_caminhao = Caminhao(dados_caminhao["id"],
-                                 dados_caminhao["placa"],
-                                 dados_caminhao["modelo"],
-                                 dados_caminhao["marca"],
-                                 dados_caminhao["ano"],
-                                 dados_caminhao["capacidade"],
-                                 dados_caminhao["tipo_carga"])
-        
-        self.__caminhao_dao.add(novo_caminhao)
+            while self.procura_caminhao(cria_id) is not None:
+                cria_id += 1
+
+            novo_caminhao = Caminhao(
+                id = cria_id,
+                placa = dados["placa"],
+                modelo = dados["modelo"],
+                marca = dados["marca"],
+                ano = dados["ano"],
+                capacidade = dados["capacidade"],
+                tipo_carga = dados["tipo_carga"]
+            )
+
+            self.__caminhao_dao.add(novo_caminhao)
+
+        except (KeyError, ValueError) as erro:
+            self.__tela_caminhao.mostrar_mensagem(f"Erro ao cadastrar caminhão: {erro}")
+
+    def listar_caminhoes(self):
+        dados_exibicao = []
+        for c in self.lista_caminhoes:
+            dados_exibicao.append({
+                "id": c.id,
+                "placa": c.placa,
+                "capacidade": c.capacidade,
+                "tipo_carga": c.tipo_carga
+            })
+        return self.__tela_caminhao.mostrar_caminhoes(dados_exibicao)
+    
+    def retornar(self):
+        self.__controlador_sistema.abre_tela()
+
+    def opcoes_caminhao(self):
+        while True:
+            opcao = self.listar_caminhoes()
+            print(opcao)
+
+            if opcao == "cadastrar":
+                self.incluir_caminhao()
+            elif opcao == "atualizar":
+                self.atualizar_caminhao()
+            elif opcao == "excluir":
+                self.excluir_caminhao()
+            elif opcao == "voltar":
+                self.__controlador_sistema.abre_tela()
+                break
+            else:
+                self.__tela_caminhao.mostrar_mensagem("Opção inválida")

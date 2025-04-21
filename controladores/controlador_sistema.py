@@ -7,7 +7,7 @@ from modelos.sessao import Sessao
 
 class ControladorSistema:
     def __init__(self):
-        self.__controlador_caminhao = ControladorCaminhao()
+        self.__controlador_caminhao = ControladorCaminhao(self)
         self.__controlador_caminhoneiro = ControladorCaminhoneiro(self)
         self.__controlador_gerente = ControladorGerente(self)
         self.__controlador_login = ControladorLogin(self)
