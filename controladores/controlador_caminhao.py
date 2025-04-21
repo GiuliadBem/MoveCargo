@@ -22,6 +22,11 @@ class ControladorCaminhao:
     
     def incluir_caminhao(self):
         dados = self.__tela_cadastro_caminhao.pega_dados_caminhao()
+
+        # Verificar se dados não é None antes de prosseguir
+        if dados is None:
+            return # Sai da função se não houver dados (cancelamento/fechamento)
+
         try:
             if dados["placa"] == "" or dados["modelo"] == "" or dados["capacidade"] == "" or dados["tipo_carga"] == "":
                 raise KeyError("Campos obrigatórios não preenchidos")
@@ -76,3 +81,6 @@ class ControladorCaminhao:
                 break
             else:
                 self.__tela_caminhao.mostrar_mensagem("Opção inválida")
+
+    def excluir_caminhao(self):
+        pass

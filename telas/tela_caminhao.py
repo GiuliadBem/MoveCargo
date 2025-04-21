@@ -3,6 +3,7 @@ import FreeSimpleGUI as sg
 class TelaCaminhao:
     def __init__(self):
         sg.theme("Reddit")
+        self.__window = None
 
     def mostrar_caminhoes(self, lista_caminhoes: list[dict]):
         layout = []
@@ -69,3 +70,11 @@ class TelaCaminhao:
                 return index
 
         self.__window.close()
+
+    def mostrar_mensagem(self, mensagem: str):
+        sg.popup(mensagem)
+
+    def fechar(self):
+        if self.__window:
+            self.__window.close()
+            self.__window = None
