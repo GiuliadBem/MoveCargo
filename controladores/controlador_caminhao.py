@@ -69,18 +69,37 @@ class ControladorCaminhao:
         while True:
             opcao = self.listar_caminhoes()
             print(opcao)
+            
+            # Se o resultado for uma string, é uma ação simples
+            if isinstance(opcao, str):
+                if opcao == "cadastrar":
+                    self.incluir_caminhao()
+                elif opcao == "voltar":
+                    self.__controlador_sistema.abre_tela()
+                    break
 
-            if opcao == "cadastrar":
-                self.incluir_caminhao()
-            elif opcao == "atualizar":
-                self.atualizar_caminhao()
-            elif opcao == "excluir":
-                self.excluir_caminhao()
-            elif opcao == "voltar":
-                self.__controlador_sistema.abre_tela()
-                break
+            # Se a opcao for um dicionário, contém operação e ID
+            elif isinstance(opcao, dict):
+                if opcao["operacao"] == "excluir":
+                    self.excluir_caminhao(opcao["id"])
+                elif opcao["operacao"] == "editar":
+                    self.atualizar_caminhao(opcao["id"])
             else:
                 self.__tela_caminhao.mostrar_mensagem("Opção inválida")
 
-    def excluir_caminhao(self):
-        pass
+    def excluir_caminhao(self, id_caminhao):
+        # Se o ID não foi passado como parâmetro, então é uma chamada direta
+        if id_caminhao is None:
+            return
+        
+        # Buscar o caminhão pelo ID
+        caminhao = self.procura_caminhao(id_caminhao)
+    
+        if caminhao is not None:
+            # Confirmar exclusão
+            if self.__tela_caminhao.confirmar_exclusao(caminhao.placa):
+                # Remover o caminhão
+                self.__caminhao_dao.remove(caminhao.id)
+                self.__tela_caminhao.mostrar_mensagem(f"Caminhão com placa {caminhao.placa} excluído com sucesso!")
+        else:
+            self.__tela_caminhao.mostrar_mensagem("Caminhão não encontrado!")
