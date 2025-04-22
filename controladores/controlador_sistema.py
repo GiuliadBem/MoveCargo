@@ -1,3 +1,4 @@
+from telas.tela_sistema import TelaSistema
 from controladores.controlador_caminhao import ControladorCaminhao
 from controladores.controlador_caminhoneiro import ControladorCaminhoneiro
 from controladores.controlador_gerente import ControladorGerente
@@ -7,6 +8,7 @@ from modelos.sessao import Sessao
 
 class ControladorSistema:
     def __init__(self):
+        self.__tela_sistema = TelaSistema()
         self.__controlador_caminhao = ControladorCaminhao(self)
         self.__controlador_caminhoneiro = ControladorCaminhoneiro(self)
         self.__controlador_gerente = ControladorGerente(self)
@@ -42,10 +44,24 @@ class ControladorSistema:
     #---------------------------------------------------------------
 
     def iniciar_sistema(self):
-        # Solicitar login do usuário
+        # Solicitar Autenticação
         while True:
             autenticacao = self.__controlador_login.iniciar_login()
             if (autenticacao != "Fail"): break
         
         # Fluxo do programa
-        print(f"Login realizado com sucesso para o usuário: {self.__sessao.usuario_atual.nome}") # type: ignore
+        while True:
+            botao = self.__tela_sistema.mostra_tela(self.__sessao.usuario_atual.usuario)
+            match botao:
+                # Botões Gerente
+                case "Fretes": pass
+                case "Caminhoneiros": self.__controlador_caminhoneiro.opcoes_caminhoneiro()
+                case "Caminhões": self.__controlador_caminhao.opcoes_caminhao()
+                case "Relatórios": pass
+
+                # Botões Caminhoneiro
+                case "Meus Fretes": pass
+                case "Meus Cadastro": pass
+
+                # Botões Compartilhados
+                case "Sair": break
