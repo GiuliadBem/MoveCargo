@@ -46,22 +46,30 @@ class ControladorSistema:
     def iniciar_sistema(self):
         # Solicitar Autenticação
         while True:
-            autenticacao = self.__controlador_login.iniciar_login()
-            if (autenticacao != "Fail"): break
+            autenticacao = self.controlador_login.iniciar_login()
+            match autenticacao:
+                # Sucesso na autenticação
+                case "Sucesso": break
+
+                # Usuário ou senha incorretos
+                case "Falha": pass
+
+                # Sair do programa
+                case "Sair": return
         
         # Fluxo do programa
         while True:
-            botao = self.__tela_sistema.mostra_tela(self.__sessao.usuario_atual.usuario)
+            botao = self.__tela_sistema.mostra_tela(self.sessao.usuario_atual.usuario)
             match botao:
                 # Botões Gerente
                 case "Fretes": pass
-                case "Caminhoneiros": self.__controlador_caminhoneiro.opcoes_caminhoneiro()
-                case "Caminhões": self.__controlador_caminhao.opcoes_caminhao()
+                case "Caminhoneiros": self.controlador_caminhoneiro.opcoes_caminhoneiro()
+                case "Caminhões": self.controlador_caminhao.opcoes_caminhao()
                 case "Relatórios": pass
 
                 # Botões Caminhoneiro
                 case "Meus Fretes": pass
                 case "Meus Cadastro": pass
 
-                # Botões Compartilhados
-                case "Sair": break
+                # Sair do programa
+                case "Sair": return
