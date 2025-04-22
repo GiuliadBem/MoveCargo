@@ -5,12 +5,18 @@ class TelaLogin:
         sg.theme("Reddit")
         self.__window = None
 
+    #---------------------------------------------------------------
+    # Helpers
+    #---------------------------------------------------------------
+
     def abre_tela(self):
+        # Estilo padronizado
         style = {
             "titleSize": (8,1),
             "inputSize": (26,1)
         }
 
+        # Tela de login
         layout = [
             [
                 sg.Text("Usuário:", size=style["titleSize"]), 
@@ -32,33 +38,43 @@ class TelaLogin:
                 sg.Push()
             ],
         ]
+
+        # Configurações da Tela
         self.__window = sg.Window("Login", layout)
 
-    def mostra_tela(self):
-        if not self.__window:
-            self.abre_tela()
+    def fechar(self):
+        # Fecha a tela, caso aberta
+        if self.__window: self.__window.close()
+        self.__window = None
+    
+    def mostrar_mensagem(self, msg: str):
+        self.__window["mensagem"].update(msg) # type: ignore
+    
+    #---------------------------------------------------------------
+    # Execução
+    #---------------------------------------------------------------
 
+    def mostra_tela(self):
+        # Abre a tela, caso fechada
+        if not self.__window: self.abre_tela()
+
+        # Leitura
         while True:
             event, values = self.__window.read()  # type: ignore
 
-            # Exit on close or cancel
+            # Evento de saída
             if event in (sg.WINDOW_CLOSED, "Cancelar"):
                 self.fechar()
                 return None, None
-
-            # Attempt login
+            # Tentativa de login
             if event == "Entrar":
                 username = values["username"].strip()
                 password = values["password"].strip()
 
-                # Basic validation (non-empty fields)
-                if username and password:
-                    return username, password
-                else:
+                # Validação básica de campos vazios
+                if not (username and password):
                     self.mostrar_mensagem("Usuário e senha são obrigatórios!")
 
-    def mostrar_mensagem(self, msg: str):
-        self.__window["mensagem"].update(msg) # type: ignore
-
-    def fechar(self):
-        self.__window.close() # type: ignore
+                # Envio de dados de usuário e login
+                else:
+                    return username, password

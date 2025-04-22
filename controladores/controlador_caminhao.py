@@ -2,6 +2,7 @@ from telas.tela_cadastro_caminhao import TelaCadastroCaminhao
 from telas.tela_caminhao import TelaCaminhao
 from modelos.caminhao import Caminhao
 from daos.caminhao_dao import CaminhaoDAO
+from enums.tipo_carga import TipoCarga
 
 class ControladorCaminhao:
     def __init__(self, controlador_sistema):
@@ -58,7 +59,7 @@ class ControladorCaminhao:
                 "id": c.id,
                 "placa": c.placa,
                 "capacidade": c.capacidade,
-                "tipo_carga": c.tipo_carga
+                "tipo_carga": c.tipo_carga.value
             })
         return self.__tela_caminhao.mostrar_caminhoes(dados_exibicao)
     
@@ -103,3 +104,55 @@ class ControladorCaminhao:
                 self.__tela_caminhao.mostrar_mensagem(f"Caminhão com placa {caminhao.placa} excluído com sucesso!")
         else:
             self.__tela_caminhao.mostrar_mensagem("Caminhão não encontrado!")
+
+    def atualizar_caminhao(self, id_caminhao):
+        # Buscar o caminhão pelo ID
+        caminhao = self.procura_caminhao(id_caminhao)
+
+        if caminhao is None:
+            self.__tela_caminhao.mostrar_mensagem("Caminhão não encontrado!")
+            return
+        
+        # Obter os novos dados
+        dados = self.__tela_cadastro_caminhao.pega_dados_caminhao(caminhao)
+
+        print(dados)
+
+        # Se cancelou a operação
+        if dados is None:
+            return
+
+        try:
+            # Verificar campos obrigatórios
+            if dados["placa"] == "" or dados["modelo"] == "" or dados["capacidade"] == "" or dados["tipo_carga"] == "":
+                raise KeyError("Campos obrigatórios não preenchidos")
+
+            # Atualizar os atributos do caminhão
+            caminhao.placa = dados["placa"]
+            caminhao.modelo = dados["modelo"]
+            caminhao.marca = dados["marca"]
+
+            # Converter e atribuir o ano
+            if dados["ano"]:
+                try:
+                    caminhao.ano = int(dados["ano"])
+                except ValueError:
+                    raise ValueError("Ano deve ser um número inteiro")
+
+            # Converter e atribuir a capacidade
+            if dados["capacidade"]:
+                try:
+                    caminhao.capacidade = float(dados["capacidade"])
+                except ValueError:
+                    raise ValueError("Capacidade deve ser um número")
+
+            # Atualizar o tipo de carga
+            caminhao.tipo_carga = TipoCarga[dados["tipo_carga"]]
+
+            # Salvar as alterações no DAO
+            self.__caminhao_dao.update(caminhao)
+
+            self.__tela_caminhao.mostrar_mensagem(f"Caminhão com placa {caminhao.placa} atualizado com sucesso!")
+
+        except (KeyError, ValueError) as erro:
+            self.__tela_caminhao.mostrar_mensagem(f"Erro ao atualizar caminhão: {erro}")
