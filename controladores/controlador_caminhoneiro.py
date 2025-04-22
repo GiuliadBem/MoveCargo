@@ -154,3 +154,36 @@ class ControladorCaminhoneiro:
 
             elif opcao == "voltar":
                 break  # aqui sai do loop e volta ao sistema
+    
+    def editar_meu_cadastro(self, usuario_logado):
+        caminhoneiro = self.procura_caminhoneiro(usuario_logado)
+
+        if not caminhoneiro:
+            self.__tela_caminhoneiro.mostrar_mensagem("Caminhoneiro não encontrado.")
+            return
+
+        # Define os campos permitidos para edição pelo próprio caminhoneiro
+        dados_atuais = {
+            "nome": caminhoneiro.nome,
+            "telefone": caminhoneiro.telefone,
+            "email": caminhoneiro.email,
+            "senha": caminhoneiro.senha
+        }
+
+        novos_dados = self.__tela_cadastro_caminhoneiro.pega_dados_atualizacao(dados_atuais)
+
+        if novos_dados is None:
+            self.__tela_caminhoneiro.mostrar_mensagem("Atualização cancelada.")
+            return
+
+        try:
+            caminhoneiro.nome = novos_dados["nome"]
+            caminhoneiro.telefone = novos_dados["telefone"]
+            caminhoneiro.email = novos_dados["email"]
+            caminhoneiro.senha = novos_dados["senha"]
+
+            self.__caminhoneiro_dao.update(caminhoneiro)
+            self.__tela_caminhoneiro.mostrar_mensagem("Cadastro atualizado com sucesso!")
+
+        except Exception as e:
+            self.__tela_caminhoneiro.mostrar_mensagem(f"Erro ao atualizar cadastro: {e}")
