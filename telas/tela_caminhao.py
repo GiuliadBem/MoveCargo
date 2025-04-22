@@ -10,7 +10,7 @@ class TelaCaminhao:
 
         # Linha superior com título e botão "+"
         topo = [
-            sg.Text("Caminhoneiros", font=("Arial", 20), expand_x=True),
+            sg.Text("Caminhões", font=("Arial", 20), expand_x=True),
             sg.Button("➕", key="adicionar", button_color=("white", "#5F41D9"), size=(3, 1), font=("Arial", 14))
         ]
         layout.append(topo)
@@ -24,10 +24,10 @@ class TelaCaminhao:
             # Cabeçalho
             cabecalho = [
                 sg.Text("ID", size=(6, 1), justification='center', font=('Arial', 12, 'bold')),
-                sg.Text("Placa", size=(20, 1), justification='center', font=('Arial', 12, 'bold')),
+                sg.Text("Placa", size=(12, 1), justification='center', font=('Arial', 12, 'bold')),
                 sg.Text("Capacidade", size=(12, 1), justification='center', font=('Arial', 12, 'bold')),
-                sg.Text("Tipo de Carga", size=(12, 1), justification='center', font=('Arial', 12, 'bold')),
-                sg.Text("Ações", size=(10, 1), justification='center', font=('Arial', 12, 'bold'))
+                sg.Text("Tipo de Carga", size=(20, 1), justification='center', font=('Arial', 12, 'bold')),
+                sg.Text("Ações", size=(20, 1), justification='right', font=('Arial', 12, 'bold'))
             ]
             layout.append(cabecalho)
             layout.append([sg.HorizontalSeparator()])
@@ -36,11 +36,12 @@ class TelaCaminhao:
             for i, c in enumerate(lista_caminhoes):
                 linha = [
                     sg.Text(c["id"], size=(6, 1), justification='center'),
-                    sg.Text(c["placa"], size=(20, 1), justification='center'),
-                    sg.Text(c["capacidade"], size=(12, 1), justification='center'),
-                    sg.Text(c["tipo_carga"], size=(12, 1), justification='center'),
+                    sg.Text(c["placa"], size=(16, 1), justification='center'),
+                    sg.Text(c["capacidade"], size=(10, 1), justification='center'),
+                    sg.Text(c["tipo_carga"], size=(26, 1), justification='center'),
+                    sg.Text("", size=(12, 1), justification='center'),
                     sg.Button("✎", key=f"editar_{i}", size=(2, 1)),
-                    sg.Button("🗑", key=f"excluir_{i}", size=(2, 1))
+                    sg.Button("🗑", key=f"excluir_{i}", size=(2, 1),)
                 ]
                 layout.append(linha)
 
