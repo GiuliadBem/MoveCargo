@@ -28,10 +28,9 @@ class ControladorCaminhoneiro:
 
     def incluir_caminhoneiro(self):
         dados = self.__tela_cadastro_caminhoneiro.pega_dados_cadastro()
+        if dados == None:
+            return
         try:
-            if dados["nome"] == "" or dados["cpf"] == "":
-                raise KeyError("Nome ou CPF vazios")
-            
             cria_id = len(self.lista_caminhoneiros) 
             while self.procura_caminhoneiro_por_id(cria_id) is not None:
                 cria_id += 1
@@ -40,7 +39,7 @@ class ControladorCaminhoneiro:
                 usuario=dados["usuario"],
                 senha=dados["senha"],
                 nome=dados["nome"],
-                cpf=int(dados["cpf"]),
+                cpf=dados["cpf"],
                 data_nascimento = dados["data_nascimento"],
                 telefone=dados["telefone"],
                 email=dados["email"],
@@ -73,8 +72,12 @@ class ControladorCaminhoneiro:
             "usuario": caminhoneiro.usuario,
             "senha": caminhoneiro.senha,
         }
+        
+        dados_permitidos = [
+            "nome", "cpf", "data_nascimento", "telefone", "email", "num_cnh", "possui_MOPP"
+        ]
 
-        novos_dados = self.__tela_cadastro_caminhoneiro.pega_dados_atualizacao(dados_atuais)
+        novos_dados = self.__tela_cadastro_caminhoneiro.pega_dados_atualizacao(dados_atuais, dados_permitidos)
 
         if novos_dados is None:
             self.__tela_caminhoneiro.mostrar_mensagem("Atualização cancelada.")
@@ -83,7 +86,7 @@ class ControladorCaminhoneiro:
         try:
             # Atualiza atributos permitidos
             caminhoneiro.nome = novos_dados["nome"]
-            caminhoneiro.cpf = int(novos_dados["cpf"])
+            caminhoneiro.cpf = novos_dados["cpf"]
             caminhoneiro.data_nascimento = novos_dados["data_nascimento"]
             caminhoneiro.telefone = novos_dados["telefone"]
             caminhoneiro.email = novos_dados["email"]
@@ -128,7 +131,7 @@ class ControladorCaminhoneiro:
                 "id": c.id,
                 "nome": c.nome,
                 "MOPP": "Sim" if c.possui_MOPP else "Não"
-                # "frete": c.frete if hasattr(c, 'frete') else "-"  # incluir futuramente
+                # "frete": c.frete if tem_frete(c, 'frete') else "-"  # incluir futuramente
             })
         return self.__tela_caminhoneiro.mostrar_caminhoneiros(dados_exibicao)
 

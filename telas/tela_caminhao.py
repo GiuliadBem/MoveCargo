@@ -77,8 +77,8 @@ class TelaCaminhao:
                 self.__window.close()
                 return {"operacao": "excluir", "id": id_caminhao}
             
-        self.__window.close()
-        return None
+            self.__window.close()
+            return None
 
     def mostrar_mensagem(self, mensagem: str):
         sg.popup(mensagem)
@@ -108,5 +108,5 @@ class TelaCaminhao:
                 janela.close()
                 return True
             
-        self.fechar()
-        return False
+            self.fechar()
+            return False
