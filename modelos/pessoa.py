@@ -6,7 +6,9 @@ class Pessoa(ABC):
         self.__usuario = usuario.lower()
         self.__senha = self.__hash_senha(senha)
     
+    #---------------------------------------------------------------
     # Getters
+    #---------------------------------------------------------------
 
     @property
     def usuario(self):
@@ -15,6 +17,10 @@ class Pessoa(ABC):
     @property
     def senha(self):
         return self.__senha
+    
+    #---------------------------------------------------------------
+    # Métodos
+    #---------------------------------------------------------------
 
     def __hash_senha(self, senha: str) -> str:
         # Hash password for storing
