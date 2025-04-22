@@ -76,7 +76,6 @@ class ControladorCaminhao:
                 if opcao == "cadastrar":
                     self.incluir_caminhao()
                 elif opcao == "voltar":
-                    self.__controlador_sistema.abre_tela()
                     break
 
             # Se a opcao for um dicionário, contém operação e ID
