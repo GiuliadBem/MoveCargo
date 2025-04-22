@@ -1,7 +1,7 @@
 from enum import Enum
 
 class TipoCarga(Enum):
-    SOLIDO = "Sólido"
-    LIQUIDO = "Líquido"
-    GASOSO = "Gasoso"
+    SOLIDA = "Sólido"
+    LIQUIDA = "Líquido"
+    GASOSA = "Gasoso"
     VIVA = "Viva"
