@@ -8,8 +8,8 @@ class TelaCadastroCaminhao:
             
     def pega_dados_caminhao(self):
         # Obter valores do enum para preencher a combobox
-        tipos_carga = [tipo.name for tipo in TipoCarga]  # Obtem os nomes (SOLIDO, LIQUIDO, etc)
-        
+        tipos_carga = [tipo.name for tipo in TipoCarga]  # Obtem os nomes (SOLIDA, LIQUIDA, etc)
+
         layout = [
             [sg.Text("Cadastro de Caminhão", font=("Arial", 16, "bold"), justification="center", expand_x=True)],
             [sg.Text("Placa:", size=(20, 1)), sg.InputText(key="placa")],

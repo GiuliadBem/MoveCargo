@@ -58,7 +58,7 @@ class ControladorCaminhao:
                 "id": c.id,
                 "placa": c.placa,
                 "capacidade": c.capacidade,
-                "tipo_carga": c.tipo_carga
+                "tipo_carga": c.tipo_carga.value
             })
         return self.__tela_caminhao.mostrar_caminhoes(dados_exibicao)
     
