@@ -42,3 +42,28 @@ class Caminhao:
     def placa(self, placa):
         if isinstance(placa, str):
             self.__placa = placa
+
+    @modelo.setter
+    def modelo(self, modelo):
+        if isinstance(modelo, str):
+            self.__modelo = modelo
+
+    @marca.setter
+    def marca(self, marca):
+        if isinstance(marca, str):
+            self.__marca = marca
+
+    @ano.setter
+    def ano(self, ano):
+        if isinstance(ano, int):
+            self.__ano = ano
+
+    @capacidade.setter
+    def capacidade(self, capacidade):
+        if isinstance(capacidade, (int, float)):
+            self.__capacidade = float(capacidade)
+
+    @tipo_carga.setter
+    def tipo_carga(self, tipo_carga):
+        if isinstance(tipo_carga, TipoCarga):
+            self.__tipo_carga = tipo_carga
