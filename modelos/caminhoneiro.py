@@ -1,9 +1,10 @@
+from datetime import date
 from modelos.pessoa import Pessoa
 
 class Caminhoneiro(Pessoa):
     def __init__(
         self, id: int, usuario: str, senha: str,
-        nome: str, cpf: str, data_nascimento ,telefone=None, email=None,
+        nome: str, cpf: str, data_nascimento: date ,telefone=None, email=None,
         num_cnh=None, possui_MOPP=False,
     ):
         super().__init__(usuario, senha)

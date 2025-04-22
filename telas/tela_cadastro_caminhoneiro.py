@@ -1,3 +1,5 @@
+from datetime import date
+from validadores import validador_cpf
 import FreeSimpleGUI as sg
 
 class TelaCadastroCaminhoneiro:
@@ -18,8 +20,13 @@ class TelaCadastroCaminhoneiro:
                  sg.Input(default_text=dados.get("nome", ""), key="nome", disabled=not campo_habilitado("nome"))],
                 [sg.Text("Email", size=(16, 1)), 
                  sg.Input(default_text=dados.get("email", ""), key="email", disabled=not campo_habilitado("email"))],
-                [sg.Text("Data de Nascimento*", size=(16, 1)), 
-                 sg.Input(default_text=dados.get("data_nascimento", ""), key="data_nascimento", disabled=not campo_habilitado("data_nascimento"))],
+                [sg.Text("Data de Nascimento*", size=(16, 1)),
+                 sg.Input(default_text=dados.get("data_nascimento", ""), key="data_nascimento", size=(20,1), disabled=not campo_habilitado("data_nascimento")),
+                 sg.CalendarButton("Selecionar", 
+                                target="data_nascimento", 
+                                key="cal_data_nascimento",
+                                format="%Y-%m-%d",
+                                disabled=not campo_habilitado("data_nascimento"))],
                 [sg.Text("Usuário*", size=(16, 1)),
                  sg.Input(default_text=dados.get("usuario", ""), key="usuario", disabled=not campo_habilitado("usuario"))],
                 [sg.Checkbox("Possui MOPP", default=dados.get("possui_MOPP", False), key="possui_MOPP", disabled=not campo_habilitado("possui_MOPP"))]
@@ -46,7 +53,7 @@ class TelaCadastroCaminhoneiro:
         return sg.Window(titulo, layout, finalize=True)
 
     def pega_dados_cadastro(self):
-        """Janela para Cadastrar Novo Caminhoneiro"""
+        #Janela para Cadastrar Novo Caminhoneiro
         window = self.__abrir_janela(titulo="Cadastrar Caminhoneiro")
 
         while True:
@@ -59,7 +66,10 @@ class TelaCadastroCaminhoneiro:
                 campos_obrigatorios = ["nome", "cpf", "data_nascimento", "usuario", "senha"]
                 for campo in campos_obrigatorios:
                     if not valores[campo]:
-                        sg.popup_error(f"⚠️ O campo '{campo}' é obrigatório.")
+                        sg.popup_error(f"O campo '{campo}' é obrigatório.")
+                        break
+                    elif not validador_cpf.validar_cpf(valores["cpf"]):
+                        sg.popup_error("CPF inválido. Verifique se está no padrão '000.000.000-00'.")
                         break
                 else:
                     window.close()
@@ -69,7 +79,7 @@ class TelaCadastroCaminhoneiro:
         return None
 
     def pega_dados_atualizacao(self, dados_antigos, campos_editaveis=None):
-        """Janela para Atualizar Caminhoneiro"""
+        #Janela para Atualizar Caminhoneiro
         window = self.__abrir_janela(dados=dados_antigos, titulo="Atualizar Caminhoneiro",
                                      modo_atualizacao=True, campos_editaveis=campos_editaveis)
 
@@ -83,7 +93,10 @@ class TelaCadastroCaminhoneiro:
                 campos_obrigatorios = ["nome", "cpf", "data_nascimento"]
                 for campo in campos_obrigatorios:
                     if campo in campos_editaveis and not valores[campo]:
-                        sg.popup_error(f"⚠️ O campo '{campo}' é obrigatório.")
+                        sg.popup_error(f"O campo '{campo}' é obrigatório.")
+                        break
+                    elif not validador_cpf.validar_cpf(valores["cpf"]):
+                        sg.popup_error("CPF inválido. Verifique se está no padrão '000.000.000-00'.")
                         break
                 else:
                     window.close()
