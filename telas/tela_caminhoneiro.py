@@ -7,7 +7,7 @@ class TelaCaminhoneiro:
     def mostrar_caminhoneiros(self, lista_caminhoneiros: list[dict]):
         layout = []
 
-        # Linha superior com título e botão "+"
+        # Título e botão +
         topo = [
             sg.Text("Caminhoneiros", font=("Arial", 20), expand_x=True),
             sg.Button("➕", key="adicionar", button_color=("white", "#5F41D9"), size=(3, 1), font=("Arial", 14))
@@ -15,57 +15,56 @@ class TelaCaminhoneiro:
         layout.append(topo)
 
         if not lista_caminhoneiros:
-            layout.append([
-                sg.Text("⚠️ Nenhum caminhoneiro cadastrado no momento.",
-                        text_color="red", font=("Arial", 12), justification='center', expand_x=True)
-            ])
+            layout.append([sg.Text("⚠️ Nenhum caminhoneiro cadastrado.", text_color="red", font=("Arial", 12))])
         else:
-            header = ["ID", "Usuário", "Possui MOPP", "Frete Atual", "", "", ""]
-            dados_tabela = []
+            layout.append([
+                sg.Text("ID", size=(5, 1)),
+                sg.Text("Usuário", size=(20, 1)),
+                sg.Text("MOPP", size=(8, 1)),
+                sg.Text("Frete", size=(12, 1)),
+                sg.Text("Ações", size=(12, 1)),
+            ])
 
-            for c in lista_caminhoneiros:
-                dados_tabela.append([
-                    c["id"],
-                    c["nome"],
-                    c["MOPP"],
-                    "-",  # ou c["frete"] se já tiver implementado
-                    "✎",  # editar
-                    "🗑",  # excluir
-                    "👁"   # visualizar
+            for caminhoneiro in lista_caminhoneiros:
+                layout.append([
+                    sg.Text(str(caminhoneiro["id"]), size=(5, 1)),
+                    sg.Text(caminhoneiro["nome"], size=(20, 1)),
+                    sg.Text(caminhoneiro["MOPP"], size=(8, 1)),
+                    sg.Text("-", size=(12, 1)),  # frete atual se houver
+                    sg.Button("✎", key=f"editar_{caminhoneiro['id']}", size=(3, 1)),
+                    sg.Button("🗑", key=f"excluir_{caminhoneiro['id']}", size=(3, 1))
                 ])
 
-            layout.append([
-                sg.Table(
-                    values=dados_tabela,
-                    headings=header,
-                    auto_size_columns=False,
-                    justification='center',
-                    num_rows=10,
-                    key='-TABELA-',
-                    enable_events=True,
-                    col_widths=[6, 20, 12, 12, 5, 5, 5],
-                    font=("Arial", 12),
-                    alternating_row_color="#f0f0f0"
-                )
-            ])
-
-        # Rodapé centralizado com botão VOLTAR
         layout.append([sg.Push(), sg.Button("VOLTAR", key="voltar", size=(15, 1), font=("Arial", 12)), sg.Push()])
-
         self.__window = sg.Window("Lista de Caminhoneiros", layout, size=(750, 420), finalize=True, resizable=True)
 
         while True:
             evento, valores = self.__window.read()
-            print("Evento clicado:", evento)
+            print("Evento:", evento)
+
             if evento in (sg.WINDOW_CLOSED, "voltar"):
-                break
+                self.__window.close()
+                return "voltar"
             elif evento == "adicionar":
                 acao = "cadastrar"
                 self.__window.close()
                 return acao
-            elif evento == "-TABELA-" and lista_caminhoneiros:
-                index = valores["-TABELA-"][0]
+            elif evento.startswith("editar_"):
+                id_caminhoneiro = int(evento.split("_")[1])
+                acao = {"acao": "editar", "id": id_caminhoneiro}
                 self.__window.close()
-                return index
-
-        self.__window.close()
+                return acao
+            elif evento.startswith("excluir_"):
+                id_caminhoneiro = int(evento.split("_")[1])
+                acao = {"acao": "excluir", "id": id_caminhoneiro}
+                self.__window.close()
+                return acao
+    
+    def confirmar_exclusao(self, nome_caminhoneiro):
+        resposta = sg.popup_yes_no(f"Tem certeza que deseja excluir o caminhoneiro '{nome_caminhoneiro}'?",
+                                    title="Confirmar Exclusão")
+        return resposta == "Yes"
+    
+    def mostrar_mensagem(self, mensagem: str, titulo: str = "Aviso"):
+        sg.popup(mensagem, title=titulo, font=("Arial", 12))
+  

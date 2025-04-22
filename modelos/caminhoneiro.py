@@ -3,8 +3,8 @@ from modelos.pessoa import Pessoa
 class Caminhoneiro(Pessoa):
     def __init__(
         self, id: int, usuario: str, senha: str,
-        nome: str, cpf: int, telefone: int, email: str,
-        num_cnh: int, cat_cnh: str, possui_MOPP: bool,
+        nome: str, cpf: str, data_nascimento ,telefone=None, email=None,
+        num_cnh=None, possui_MOPP=False,
     ):
         super().__init__(usuario, senha)
         self.__id = id
@@ -13,29 +13,11 @@ class Caminhoneiro(Pessoa):
         self.__telefone = telefone
         self.__email = email
         self.__num_cnh = num_cnh
-        self.__cat_cnh = cat_cnh
         self.__possui_MOPP = possui_MOPP
+        self.__data_nascimento = data_nascimento
         self.__freteAtual = None
         self.__notificacoes = []
 
-
-    # Validação de CPF -> CONTROLADOR(NÃO FAZ SENTIDO SER NO SETTER)
-    def validar_cpf(cpf: int):
-        cpf_str = str(cpf)
-
-        # Deve ter exatamente 11 dígitos e não pode ter todos os dígitos iguais
-        if len(cpf_str) != 11 or cpf_str == cpf_str[0] * 11:
-            return False
-
-        # Cálculo do primeiro dígito verificador
-        soma1 = sum(int(cpf_str[i]) * (10 - i) for i in range(9))
-        digito1 = (soma1 * 10 % 11) % 10
-
-        # Cálculo do segundo dígito verificador
-        soma2 = sum(int(cpf_str[i]) * (11 - i) for i in range(10))
-        digito2 = (soma2 * 10 % 11) % 10
-
-        return cpf_str[9] == str(digito1) and cpf_str[10] == str(digito2)
 
     # Getters e Setters
 
@@ -49,20 +31,14 @@ class Caminhoneiro(Pessoa):
 
     @cpf.setter
     def cpf(self, cpf):
-        if not self.validar_cpf(cpf):
-            raise ValueError("CPF inválido.")
         self.__cpf = cpf
 
-    # Validação de telefone
     @property
     def telefone(self):
         return self.__telefone
 
     @telefone.setter
     def telefone(self, telefone):
-        telefone_str = str(telefone)
-        if not telefone_str.isdigit() or len(telefone_str) < 10 or len(telefone_str) > 11:
-            raise ValueError("Telefone deve conter entre 10 e 11 dígitos.")
         self.__telefone = telefone
     
     @property
@@ -112,3 +88,11 @@ class Caminhoneiro(Pessoa):
     @freteAtual.setter
     def freteAtual(self, freteAtual):
         self.__freteAtual = freteAtual
+    
+    @property
+    def data_nascimento(self):
+        return self.__data_nascimento
+    
+    @data_nascimento.setter
+    def data_nascimento(self, data_nascimento):
+        self.__data_nascimento = data_nascimento
