@@ -29,31 +29,13 @@ class ControladorCaminhao:
             return # Sai da função se não houver dados (cancelamento/fechamento)
 
         try:
-            if dados["placa"] == "" or dados["modelo"] == "" or dados["capacidade"] == "" or dados["tipo_carga"] == "":
-                raise KeyError("Campos obrigatórios não preenchidos")
-            
-            # Verificar e converter o ano
-            ano_valor = 0
-            if dados["ano"]:
-                try:
-                    ano_valor = int(dados["ano"])
-                    if ano_valor < 1900 or ano_valor > 2100:  # Validação adicional para ano
-                        raise ValueError("Ano deve estar entre 1900 e 2100")
-                except ValueError:
-                    raise ValueError("Ano deve ser um número inteiro válido")
-            
-            # Verificar e converter a capacidade
-            try:
-                capacidade_valor = float(dados["capacidade"])
-                if capacidade_valor <= 0:  # Validação adicional para capacidade
-                    raise ValueError("Capacidade deve ser maior que zero")
-            except ValueError:
-                raise ValueError("Capacidade deve ser um número válido")
-            
             cria_id = len(self.lista_caminhoes)
 
             while self.procura_caminhao(cria_id) is not None:
                 cria_id += 1
+
+            ano_valor = int(dados["ano"]) if dados["ano"] else 0
+            capacidade_valor = float(dados["capacidade"])
 
             novo_caminhao = Caminhao(
                 id = cria_id,
@@ -68,7 +50,7 @@ class ControladorCaminhao:
             self.__caminhao_dao.add(novo_caminhao)
             self.__tela_caminhao.mostrar_mensagem(f"Caminhão com placa {dados['placa']} cadastrado com sucesso!")
 
-        except (KeyError, ValueError) as erro:
+        except Exception as erro:
             self.__tela_caminhao.mostrar_mensagem(f"Erro ao cadastrar caminhão: {erro}")
 
     def listar_caminhoes(self):
@@ -142,10 +124,6 @@ class ControladorCaminhao:
             return
 
         try:
-            # Verificar campos obrigatórios
-            if dados["placa"] == "" or dados["modelo"] == "" or dados["capacidade"] == "" or dados["tipo_carga"] == "":
-                raise KeyError("Campos obrigatórios não preenchidos")
-
             # Atualizar os atributos do caminhão
             caminhao.placa = dados["placa"]
             caminhao.modelo = dados["modelo"]
@@ -153,25 +131,9 @@ class ControladorCaminhao:
 
             # Converter e atribuir o ano
             if dados["ano"]:
-                try:
-                    ano_valor = int(dados["ano"])
-                    if ano_valor < 1900 or ano_valor > 2100:  # Validação adicional para ano
-                        raise ValueError("Ano deve estar entre 1900 e 2100")
-                    caminhao.ano = ano_valor
-                except ValueError:
-                    raise ValueError("Ano deve ser um número inteiro válido")
-            
-            # Converter e atribuir a capacidade
-            if dados["capacidade"]:
-                try:
-                    capacidade_valor = float(dados["capacidade"])
-                    if capacidade_valor <= 0:  # Validação adicional para capacidade
-                        raise ValueError("Capacidade deve ser maior que zero")
-                    caminhao.capacidade = capacidade_valor
-                except ValueError:
-                    raise ValueError("Capacidade deve ser um número válido")
+                caminhao.ano = int(dados["ano"])
 
-            # Atualizar o tipo de carga
+            caminhao.capacidade = float(dados["capacidade"])
             caminhao.tipo_carga = TipoCarga[dados["tipo_carga"]]
 
             # Salvar as alterações no DAO

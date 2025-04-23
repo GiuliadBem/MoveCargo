@@ -69,7 +69,34 @@ class TelaCadastroCaminhao:
                 self.__window.close()
                 return None
             elif evento == "Cadastrar" or evento == "Atualizar":
-                self.__window.close()
+                # Validar campos obrigatórios
+                if not valores["placa"] or not valores["modelo"] or not valores["capacidade"] or not valores["tipo_carga"]:
+                    sg.popup_error("Campos obrigatórios não preenchidos")
+                    continue
+                
+                # Validar ano (se fornecido)
+                if valores["ano"]:
+                    try:
+                        ano_valor = int(valores["ano"])
+                        if ano_valor < 1900 or ano_valor > 2100:
+                            sg.popup_error("Ano deve estar entre 1900 e 2100")
+                            continue
+                    except ValueError:
+                        sg.popup_error("Ano deve ser um número inteiro válido")
+                        continue
+                
+                # Validar capacidade
+                try:
+                    capacidade_valor = float(valores["capacidade"])
+                    if capacidade_valor <= 0:
+                        sg.popup_error("Capacidade deve ser maior que zero")
+                        continue
+                except ValueError:
+                    sg.popup_error("Capacidade deve ser um número válido")
+                    continue
+                
+                # Se chegou aqui, todos os dados são válidos
+                self.fechar()
                 return valores
     
     def fechar(self):
