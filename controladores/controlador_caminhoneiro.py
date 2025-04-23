@@ -72,30 +72,29 @@ class ControladorCaminhoneiro:
             "usuario": caminhoneiro.usuario,
             "senha": caminhoneiro.senha,
         }
-        
-        dados_permitidos = [
-            "nome", "cpf", "data_nascimento", "telefone", "email", "num_cnh", "possui_MOPP"
+
+        campos_editaveis = [
+            "nome", "cpf", "data_nascimento", "telefone",
+            "email", "num_cnh", "possui_MOPP"
         ]
 
-        novos_dados = self.__tela_cadastro_caminhoneiro.pega_dados_atualizacao(dados_atuais, dados_permitidos)
+        novos_dados = self.__tela_cadastro_caminhoneiro.pega_dados_atualizacao(dados_atuais, campos_editaveis)
 
         if novos_dados is None:
             self.__tela_caminhoneiro.mostrar_mensagem("Atualização cancelada.")
             return
 
         try:
-            # Atualiza atributos permitidos
-            caminhoneiro.nome = novos_dados["nome"]
-            caminhoneiro.cpf = novos_dados["cpf"]
-            caminhoneiro.data_nascimento = novos_dados["data_nascimento"]
-            caminhoneiro.telefone = novos_dados["telefone"]
-            caminhoneiro.email = novos_dados["email"]
-            caminhoneiro.num_cnh = novos_dados["num_cnh"]
-            caminhoneiro.possui_MOPP = bool(novos_dados["possui_MOPP"])
+            for campo in campos_editaveis:
+                valor = novos_dados.get(campo)
 
-            # Atualiza o DAO
+                # Converte checkbox em booleano
+                if campo == "possui_MOPP":
+                    valor = bool(valor)
+
+                setattr(caminhoneiro, campo, valor)
+
             self.__caminhoneiro_dao.update(caminhoneiro)
-
             self.__tela_caminhoneiro.mostrar_mensagem("Caminhoneiro atualizado com sucesso!")
 
         except Exception as e:
