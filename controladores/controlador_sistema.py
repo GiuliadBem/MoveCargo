@@ -69,7 +69,7 @@ class ControladorSistema:
 
                 # Botões Caminhoneiro
                 case "Meus Fretes": pass
-                case "Meus Cadastro": pass
+                case "Meu Cadastro": self.controlador_caminhoneiro.atualizar_caminhoneiro(self.sessao.usuario_atual.id)
 
                 # Sair do programa
                 case "Sair": return
