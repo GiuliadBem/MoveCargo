@@ -42,8 +42,8 @@ class ControladorCaminhao:
                 placa = dados["placa"],
                 modelo = dados["modelo"],
                 marca = dados["marca"],
-                ano = dados["ano"],
-                capacidade = dados["capacidade"],
+                ano = ano_valor,
+                capacidade = capacidade_valor,
                 tipo_carga = dados["tipo_carga"]
             )
 
