@@ -29,14 +29,26 @@ class TelaCadastroCaminhao:
         # Texto do botão principal
         texto_botao = "Atualizar" if caminhao else "Cadastrar"
 
+        # Definir asterisco em vermelho para campos obrigatórios
+        campo_obrigatorio = "*"
+
         layout = [
             [sg.Text(titulo, font=("Arial", 16, "bold"), justification="center", expand_x=True)],
-            [sg.Text("Placa:", size=(20, 1)), sg.InputText(key="placa", default_text=valores_padrao["placa"])],
-            [sg.Text("Modelo:", size=(20, 1)), sg.InputText(key="modelo", default_text=valores_padrao["modelo"])],
-            [sg.Text("Marca:", size=(20, 1)), sg.InputText(key="marca", default_text=valores_padrao["marca"])],
-            [sg.Text("Ano:", size=(20, 1)), sg.InputText(key="ano", default_text=valores_padrao["ano"])],
-            [sg.Text("Capacidade:", size=(20, 1)), sg.InputText(key="capacidade", default_text=valores_padrao["capacidade"], size=(15, 1)), sg.Text(unidade_inicial, key="unidade_medida", size=(3, 1))],
-            [sg.Text("Tipo de Carga:", size=(20, 1)), sg.Combo(tipos_carga, default_value=valores_padrao["tipo_carga"], key="tipo_carga", size=(18, 1))],
+            [sg.Text(f"Placa{campo_obrigatorio}:", size=(20, 1)), 
+            sg.InputText(key="placa", default_text=valores_padrao["placa"])],
+            [sg.Text(f"Modelo{campo_obrigatorio}:", size=(20, 1)), 
+            sg.InputText(key="modelo", default_text=valores_padrao["modelo"])],
+            [sg.Text("Marca:", size=(20, 1)), 
+            sg.InputText(key="marca", default_text=valores_padrao["marca"])],
+            [sg.Text("Ano:", size=(20, 1)), 
+            sg.InputText(key="ano", default_text=valores_padrao["ano"])],
+            [sg.Text(f"Tipo de Carga{campo_obrigatorio}:", size=(20, 1)), 
+            sg.Combo(tipos_carga, default_value=valores_padrao["tipo_carga"], key="tipo_carga", 
+                    enable_events=True, size=(18, 1))],
+            [sg.Text(f"Capacidade{campo_obrigatorio}:", size=(20, 1)), 
+            sg.InputText(key="capacidade", default_text=valores_padrao["capacidade"], size=(15, 1)),
+            sg.Text(unidade_inicial, key="unidade_medida", size=(3, 1))],
+            [sg.Text("* Campos obrigatórios", text_color="red", font=("Arial", 10, "italic"))],
             [sg.Button(texto_botao, button_color=("white", "#5F41D9"), size=(15, 1)),
             sg.Button("Voltar", button_color=("white", "#C0C0C0"), size=(15, 1))]
         ]
@@ -52,7 +64,7 @@ class TelaCadastroCaminhao:
                 tipo_selecionado = valores["tipo_carga"]
                 unidade = "kg" if tipo_selecionado in ["SOLIDA", "VIVA"] else "L"
                 self.__window["unidade_medida"].update(unidade)
-                
+
             if evento in (sg.WINDOW_CLOSED, "Voltar"):
                 self.__window.close()
                 return None
