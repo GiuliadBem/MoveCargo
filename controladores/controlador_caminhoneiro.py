@@ -74,8 +74,7 @@ class ControladorCaminhoneiro:
         }
 
         campos_editaveis = [
-            "nome", "cpf", "data_nascimento", "telefone",
-            "email", "num_cnh", "possui_MOPP"
+            "telefone", "email", "num_cnh", "possui_MOPP"
         ]
 
         novos_dados = self.__tela_cadastro_caminhoneiro.pega_dados_atualizacao(dados_atuais, campos_editaveis)
