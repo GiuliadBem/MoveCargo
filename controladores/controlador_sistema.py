@@ -65,7 +65,7 @@ class ControladorSistema:
         
         # Fluxo do programa
         while True:
-            botao = self.__tela_sistema.mostra_tela(self.sessao.usuario_atual.usuario)
+            botao = self.__tela_sistema.mostra_tela(self.sessao.usuario_atual.usuario) # type: ignore
             match botao:
                 # Botões Gerente
                 case "Fretes": self.controlador_frete.opcoes_frete()
@@ -75,7 +75,7 @@ class ControladorSistema:
 
                 # Botões Caminhoneiro
                 case "Meus Fretes": pass
-                case "Meus Cadastro": pass
+                case "Meu Cadastro": self.controlador_caminhoneiro.atualizar_caminhoneiro(self.sessao.usuario_atual.id)
 
                 # Sair do programa
                 case "Sair": return

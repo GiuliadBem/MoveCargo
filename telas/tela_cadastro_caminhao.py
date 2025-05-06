@@ -20,19 +20,35 @@ class TelaCadastroCaminhao:
             "tipo_carga": caminhao.tipo_carga.name if caminhao else tipos_carga[0]
         }
 
+        # Determinar a unidade inicial
+        tipo_padrao = valores_padrao["tipo_carga"]
+        unidade_inicial = "kg" if tipo_padrao in ["SOLIDA", "VIVA"] else "L"
+
         # Título da janela (Cadastro ou Edição)
         titulo = "Edição de Caminhão" if caminhao else "Cadastro de Caminhão"
         # Texto do botão principal
         texto_botao = "Atualizar" if caminhao else "Cadastrar"
 
+        # Definir asterisco em vermelho para campos obrigatórios
+        campo_obrigatorio = "*"
+
         layout = [
             [sg.Text(titulo, font=("Arial", 16, "bold"), justification="center", expand_x=True)],
-            [sg.Text("Placa:", size=(20, 1)), sg.InputText(key="placa", default_text=valores_padrao["placa"])],
-            [sg.Text("Modelo:", size=(20, 1)), sg.InputText(key="modelo", default_text=valores_padrao["modelo"])],
-            [sg.Text("Marca:", size=(20, 1)), sg.InputText(key="marca", default_text=valores_padrao["marca"])],
-            [sg.Text("Ano:", size=(20, 1)), sg.InputText(key="ano", default_text=valores_padrao["ano"])],
-            [sg.Text("Capacidade:", size=(20, 1)), sg.InputText(key="capacidade", default_text=valores_padrao["capacidade"])],
-            [sg.Text("Tipo de Carga:", size=(20, 1)), sg.Combo(tipos_carga, default_value=valores_padrao["tipo_carga"], key="tipo_carga", size=(18, 1))],
+            [sg.Text(f"Placa{campo_obrigatorio}:", size=(20, 1)), 
+            sg.InputText(key="placa", default_text=valores_padrao["placa"])],
+            [sg.Text(f"Modelo{campo_obrigatorio}:", size=(20, 1)), 
+            sg.InputText(key="modelo", default_text=valores_padrao["modelo"])],
+            [sg.Text("Marca:", size=(20, 1)), 
+            sg.InputText(key="marca", default_text=valores_padrao["marca"])],
+            [sg.Text("Ano:", size=(20, 1)), 
+            sg.InputText(key="ano", default_text=valores_padrao["ano"])],
+            [sg.Text(f"Tipo de Carga{campo_obrigatorio}:", size=(20, 1)), 
+            sg.Combo(tipos_carga, default_value=valores_padrao["tipo_carga"], key="tipo_carga", 
+                    enable_events=True, size=(18, 1))],
+            [sg.Text(f"Capacidade{campo_obrigatorio}:", size=(20, 1)), 
+            sg.InputText(key="capacidade", default_text=valores_padrao["capacidade"], size=(15, 1)),
+            sg.Text(unidade_inicial, key="unidade_medida", size=(3, 1))],
+            [sg.Text("* Campos obrigatórios", text_color="red", font=("Arial", 10, "italic"))],
             [sg.Button(texto_botao, button_color=("white", "#5F41D9"), size=(15, 1)),
             sg.Button("Voltar", button_color=("white", "#C0C0C0"), size=(15, 1))]
         ]
@@ -42,11 +58,45 @@ class TelaCadastroCaminhao:
         while True:
             # valores é um dicionário que é retornado por window.read(), e contém todos os valores do input
             evento, valores = self.__window.read()
+
+            # Atualizar a unidade de medida quando o tipo de carga mudar
+            if evento == "tipo_carga":
+                tipo_selecionado = valores["tipo_carga"]
+                unidade = "kg" if tipo_selecionado in ["SOLIDA", "VIVA"] else "L"
+                self.__window["unidade_medida"].update(unidade)
+
             if evento in (sg.WINDOW_CLOSED, "Voltar"):
                 self.__window.close()
                 return None
             elif evento == "Cadastrar" or evento == "Atualizar":
-                self.__window.close()
+                # Validar campos obrigatórios
+                if not valores["placa"] or not valores["modelo"] or not valores["capacidade"] or not valores["tipo_carga"]:
+                    sg.popup_error("Campos obrigatórios não preenchidos")
+                    continue
+                
+                # Validar ano (se fornecido)
+                if valores["ano"]:
+                    try:
+                        ano_valor = int(valores["ano"])
+                        if ano_valor < 1900 or ano_valor > 2100:
+                            sg.popup_error("Ano deve estar entre 1900 e 2100")
+                            continue
+                    except ValueError:
+                        sg.popup_error("Ano deve ser um número inteiro válido")
+                        continue
+                
+                # Validar capacidade
+                try:
+                    capacidade_valor = float(valores["capacidade"])
+                    if capacidade_valor <= 0:
+                        sg.popup_error("Capacidade deve ser maior que zero")
+                        continue
+                except ValueError:
+                    sg.popup_error("Capacidade deve ser um número válido")
+                    continue
+                
+                # Se chegou aqui, todos os dados são válidos
+                self.fechar()
                 return valores
     
     def fechar(self):

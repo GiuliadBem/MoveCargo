@@ -14,7 +14,7 @@ class TelaCadastroCaminhoneiro:
             return not modo_atualizacao or campo in campos_editaveis
 
         layout = [
-            [sg.Text("CADASTRO DE CAMINHONEIRO", font=("Helvetica", 18, "bold"), justification='center', expand_x=True)],
+            [sg.Text("CADASTRO DE CAMINHONEIRO " if not modo_atualizacao else "ATUALIZAÇÃO DE CAMINHONEIRO", font=("Helvetica", 18, "bold"), justification='center', expand_x=True)],
             [sg.Column([
                 [sg.Text("Nome completo*", size=(16, 1)), 
                  sg.Input(default_text=dados.get("nome", ""), key="nome", disabled=not campo_habilitado("nome"))],

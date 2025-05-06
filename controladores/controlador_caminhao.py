@@ -29,36 +29,40 @@ class ControladorCaminhao:
             return # Sai da função se não houver dados (cancelamento/fechamento)
 
         try:
-            if dados["placa"] == "" or dados["modelo"] == "" or dados["capacidade"] == "" or dados["tipo_carga"] == "":
-                raise KeyError("Campos obrigatórios não preenchidos")
-            
             cria_id = len(self.lista_caminhoes)
 
             while self.procura_caminhao(cria_id) is not None:
                 cria_id += 1
+
+            ano_valor = int(dados["ano"]) if dados["ano"] else 0
+            capacidade_valor = float(dados["capacidade"])
 
             novo_caminhao = Caminhao(
                 id = cria_id,
                 placa = dados["placa"],
                 modelo = dados["modelo"],
                 marca = dados["marca"],
-                ano = dados["ano"],
-                capacidade = dados["capacidade"],
+                ano = ano_valor,
+                capacidade = capacidade_valor,
                 tipo_carga = dados["tipo_carga"]
             )
 
             self.__caminhao_dao.add(novo_caminhao)
+            self.__tela_caminhao.mostrar_mensagem(f"Caminhão com placa {dados['placa']} cadastrado com sucesso!")
 
-        except (KeyError, ValueError) as erro:
+        except Exception as erro:
             self.__tela_caminhao.mostrar_mensagem(f"Erro ao cadastrar caminhão: {erro}")
 
     def listar_caminhoes(self):
         dados_exibicao = []
         for c in self.lista_caminhoes:
+            # Determinar a unidade com base no tipo de carga
+            unidade = "kg" if c.tipo_carga.name in ["SOLIDA", "VIVA"] else "L"
+
             dados_exibicao.append({
                 "id": c.id,
                 "placa": c.placa,
-                "capacidade": c.capacidade,
+                "capacidade": f"{c.capacidade} {unidade}",  # Incluir a unidade
                 "tipo_carga": c.tipo_carga.value
             })
         return self.__tela_caminhao.mostrar_caminhoes(dados_exibicao)
@@ -76,7 +80,6 @@ class ControladorCaminhao:
                 if opcao == "cadastrar":
                     self.incluir_caminhao()
                 elif opcao == "voltar":
-                    self.__controlador_sistema.abre_tela()
                     break
 
             # Se a opcao for um dicionário, contém operação e ID
@@ -116,17 +119,11 @@ class ControladorCaminhao:
         # Obter os novos dados
         dados = self.__tela_cadastro_caminhao.pega_dados_caminhao(caminhao)
 
-        print(dados)
-
         # Se cancelou a operação
         if dados is None:
             return
 
         try:
-            # Verificar campos obrigatórios
-            if dados["placa"] == "" or dados["modelo"] == "" or dados["capacidade"] == "" or dados["tipo_carga"] == "":
-                raise KeyError("Campos obrigatórios não preenchidos")
-
             # Atualizar os atributos do caminhão
             caminhao.placa = dados["placa"]
             caminhao.modelo = dados["modelo"]
@@ -134,19 +131,9 @@ class ControladorCaminhao:
 
             # Converter e atribuir o ano
             if dados["ano"]:
-                try:
-                    caminhao.ano = int(dados["ano"])
-                except ValueError:
-                    raise ValueError("Ano deve ser um número inteiro")
+                caminhao.ano = int(dados["ano"])
 
-            # Converter e atribuir a capacidade
-            if dados["capacidade"]:
-                try:
-                    caminhao.capacidade = float(dados["capacidade"])
-                except ValueError:
-                    raise ValueError("Capacidade deve ser um número")
-
-            # Atualizar o tipo de carga
+            caminhao.capacidade = float(dados["capacidade"])
             caminhao.tipo_carga = TipoCarga[dados["tipo_carga"]]
 
             # Salvar as alterações no DAO
