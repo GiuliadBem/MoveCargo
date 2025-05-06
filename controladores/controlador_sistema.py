@@ -1,6 +1,7 @@
 from telas.tela_sistema import TelaSistema
 from controladores.controlador_caminhao import ControladorCaminhao
 from controladores.controlador_caminhoneiro import ControladorCaminhoneiro
+from controladores.controlador_frete import ControladorFrete
 from controladores.controlador_gerente import ControladorGerente
 from controladores.controlador_login import ControladorLogin
 from modelos.sessao import Sessao
@@ -11,6 +12,7 @@ class ControladorSistema:
         self.__tela_sistema = TelaSistema()
         self.__controlador_caminhao = ControladorCaminhao(self)
         self.__controlador_caminhoneiro = ControladorCaminhoneiro(self)
+        self.__controlador_frete = ControladorFrete(self)
         self.__controlador_gerente = ControladorGerente(self)
         self.__controlador_login = ControladorLogin(self)
         self.__sessao = Sessao()
@@ -26,6 +28,10 @@ class ControladorSistema:
     @property
     def controlador_caminhoneiro(self):
         return self.__controlador_caminhoneiro
+    
+    @property
+    def controlador_frete(self):
+        return self.__controlador_frete
     
     @property
     def controlador_gerente(self):
@@ -62,7 +68,7 @@ class ControladorSistema:
             botao = self.__tela_sistema.mostra_tela(self.sessao.usuario_atual.usuario)
             match botao:
                 # Botões Gerente
-                case "Fretes": pass
+                case "Fretes": self.controlador_frete.opcoes_frete()
                 case "Caminhoneiros": self.controlador_caminhoneiro.opcoes_caminhoneiro()
                 case "Caminhões": self.controlador_caminhao.opcoes_caminhao()
                 case "Relatórios": pass
