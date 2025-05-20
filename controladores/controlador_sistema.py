@@ -74,7 +74,7 @@ class ControladorSistema:
                 case "Relatórios": pass
 
                 # Botões Caminhoneiro
-                case "Meus Fretes": pass
+                case "Meus Fretes": self.controlador_frete.opcoes_meus_fretes(self.sessao.usuario_atual.id)
                 case "Meu Cadastro": self.controlador_caminhoneiro.atualizar_caminhoneiro(self.sessao.usuario_atual.id)
 
                 # Sair do programa

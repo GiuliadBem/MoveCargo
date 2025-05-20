@@ -69,3 +69,51 @@ class TelaFrete:
 
     def mostrar_mensagem(self, mensagem: str, titulo: str = "Aviso"):
         sg.popup(mensagem, title=titulo, font=("Arial", 12))
+
+    # -- Atualizar Status do Frete -------------------------------------------------------------------------------------------------------------------------------------- #
+    def mostrar_meus_fretes(self, lista_fretes: list[dict]):
+        layout = []
+
+        # Título
+        topo = [
+            sg.Text("Meus Fretes", font=("Arial", 20), expand_x=True)
+        ]
+        layout.append(topo)
+
+        if not lista_fretes:
+            layout.append([sg.Text("⚠️ Nenhum frete encontrado.", text_color="red", font=("Arial", 12))])
+        else:
+            layout.append([
+                sg.Text("ID", size=(5, 1)),
+                sg.Text("Origem", size=(15, 1)),
+                sg.Text("Destino", size=(15, 1)),
+                sg.Text("Status", size=(12, 1)),
+                sg.Text("Prazo", size=(15, 1)),
+                sg.Text("Ações", size=(12, 1)),
+            ])
+
+            for frete in lista_fretes:
+                layout.append([
+                    sg.Text(str(frete["id"]), size=(5, 1)),
+                    sg.Text(frete["origem"], size=(15, 1)),
+                    sg.Text(frete["destino"], size=(15, 1)),
+                    sg.Text(frete["status"], size=(12, 1)),
+                    sg.Text(str(frete["prazo_entrega"]), size=(15, 1)),
+                    sg.Button("Atualizar Status", key=f"atualizar_{frete['id']}", size=(15, 1))
+                ])
+
+        layout.append([sg.Push(), sg.Button("VOLTAR", key="voltar", size=(15, 1), font=("Arial", 12)), sg.Push()])
+        self.__window = sg.Window("Meus Fretes", layout, size=(850, 450), finalize=True, resizable=True)
+
+        while True:
+            evento, valores = self.__window.read()
+            print("Evento:", evento)
+
+            if evento in (sg.WINDOW_CLOSED, "voltar"):
+                self.__window.close()
+                return "voltar"
+            elif evento.startswith("atualizar_"):
+                id_frete = int(evento.split("_")[1])
+                self.__window.close()
+                return {"acao": "atualizar", "id": id_frete}
+    # ------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
