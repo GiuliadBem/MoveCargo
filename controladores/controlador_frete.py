@@ -172,3 +172,62 @@ class ControladorFrete:
 
             elif opcao == "voltar":
                 break
+
+    # -- Atualizar Status do Frete -------------------------------------------------------------------------------------------------------------------------------------- #
+    def atualizar_status_frete(self, id_frete):
+        frete = self.procura_frete_por_id(id_frete)
+
+        if not frete:
+            self.__tela_frete.mostrar_mensagem("Frete não encontrado.")
+            return
+
+        # Verificar se o frete pertence ao caminhoneiro logado
+        if frete.caminhoneiro.id != self.__controlador_sistema.sessao.usuario_atual.id:
+            self.__tela_frete.mostrar_mensagem("Você não tem permissão para atualizar este frete.")
+            return
+
+        # Verificar se o frete está ativo
+        if frete.status not in [Status.NAO_INICIADO, Status.EM_ANDAMENTO, Status.SUSPENSO]:
+            self.__tela_frete.mostrar_mensagem("Este frete não está ativo.")
+            return
+
+        # Obter os novos dados usando a tela de cadastro em modo de atualização de status
+        dados = self.__tela_cadastro_frete.pega_dados_cadastro(
+            self.__controlador_sistema.controlador_caminhoneiro.lista_caminhoneiros,
+            self.__controlador_sistema.controlador_caminhao.lista_caminhoes,
+            frete,
+            modo_atualizacao_status=True
+        )
+
+        if dados is None:
+            self.__tela_frete.mostrar_mensagem("Atualização cancelada.")
+            return
+
+        # Atualizar apenas o status
+        frete.status = Status[dados["status"]]
+        self.__frete_dao.update(frete)
+        self.__tela_frete.mostrar_mensagem("Status atualizado com sucesso!")
+    
+    def listar_meus_fretes(self, id_caminhoneiro):
+        dados_exibicao = []
+        for f in self.lista_fretes:
+            if f.caminhoneiro.id == id_caminhoneiro:
+                dados_exibicao.append({
+                    "id": f.id,
+                    "origem": f.origem,
+                    "destino": f.destino,
+                    "status": f.status.name,
+                    "prazo_entrega": f.prazo_entrega  # Supondo que este campo existe
+                })
+        return self.__tela_frete.mostrar_meus_fretes(dados_exibicao)
+    
+    def opcoes_meus_fretes(self, id_caminhoneiro):
+        while True:
+            opcao = self.listar_meus_fretes(id_caminhoneiro)
+
+            if opcao == "voltar":
+                break
+            elif isinstance(opcao, dict) and opcao["acao"] == "atualizar":
+                id_frete = opcao["id"]
+                self.atualizar_status_frete(id_frete)
+    # ------------------------------------------------------------------------------------------------------------------------------------------------------------------- #

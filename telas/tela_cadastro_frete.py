@@ -6,7 +6,7 @@ class TelaCadastroFrete:
         sg.theme("Reddit")
         self.__window = None  # Armazena a própria janela de cadastro de frete
 
-    def pega_dados_frete(self, lista_caminhoneiros, lista_caminhoes, frete=None):
+    def pega_dados_frete(self, lista_caminhoneiros, lista_caminhoes, frete=None, modo_atualizacao_status=False):
         observacoes_adicionadas = []
         
         # Mapas auxiliares para vincular nome formatado → objeto
@@ -32,29 +32,36 @@ class TelaCadastroFrete:
                 f"{obs.texto} - {obs.data.strftime('%H:%M - %d/%m/%Y')}" for obs in frete.observacoes
             ]
 
-        titulo = "Edição de Frete" if frete else "Cadastro de Frete"
-        texto_botao = "Atualizar" if frete else "Cadastrar"
+        # Define o título e texto do botão baseado no modo
+        if modo_atualizacao_status:
+            titulo = "Atualizar Status do Frete"
+            texto_botao = "Atualizar Status"
+        else:
+            titulo = "Edição de Frete" if frete else "Cadastro de Frete"
+            texto_botao = "Atualizar" if frete else "Cadastrar"
 
         layout = [
             [sg.Text(titulo, font=("Arial", 16, "bold"), justification="center", expand_x=True)],
-            [sg.Text("Origem:", size=(12, 1)), sg.InputText(key="origem", default_text=valores_padrao["origem"]),
-             sg.Text("Destino:", size=(12, 1)), sg.InputText(key="destino", default_text=valores_padrao["destino"])],
-
-            [sg.Text("Carga:", size=(12, 1)), sg.InputText(key="carga", default_text=valores_padrao["carga"], size=(32,1)),
-             sg.Button("ADICIONAR CARGA", key="add_carga", size=(18,1))],
-
-            [sg.Text("Distância (km):", size=(12, 1)), sg.InputText(key="distancia", default_text=str(valores_padrao["distancia"])),
-             sg.Text("Caminhão:", size=(12, 1)), sg.Combo(caminhao_opcoes, default_value=valores_padrao["caminhao"], key="caminhao", size=(30, 1))],
-
-            [sg.Text("Status:", size=(12, 1)), sg.Combo(status_opcoes, default_value=valores_padrao["status"], key="status", size=(20, 1)),
-             sg.Text("Caminhoneiro:", size=(12, 1)), sg.Combo(caminhoneiro_opcoes, default_value=valores_padrao["caminhoneiro"], key="caminhoneiro", size=(30, 1))],
-            
-
-            [sg.Text("Observações:", size=(12, 1)), sg.Column([[sg.Multiline("\n".join(observacoes_adicionadas), size=(40, 4), disabled=True, key="observacoes_display")]], element_justification='left'),
-             sg.Button("ADICIONAR OBSERVAÇÃO", key="add_observacao", size=(22, 2), button_color=("white", "#5F41D9"))],
-
-            [sg.Push(), sg.Button("SALVAR ALTERAÇÕES", key=texto_botao, button_color=("white", "#5F41D9"), size=(20, 1)),
-             sg.Button("VOLTAR", button_color=("white", "#C0C0C0"), size=(15, 1)), sg.Push()]
+            [sg.Text("Origem:", size=(20, 1)), 
+            sg.InputText(key="origem", default_text=valores_padrao["origem"], 
+                        disabled=modo_atualizacao_status)],
+            [sg.Text("Destino:", size=(20, 1)), 
+            sg.InputText(key="destino", default_text=valores_padrao["destino"], 
+                        disabled=modo_atualizacao_status)],
+            [sg.Text("Distância (km):", size=(20, 1)), 
+            sg.InputText(key="distancia", default_text=str(valores_padrao["distancia"]), 
+                        disabled=modo_atualizacao_status)],
+            [sg.Text("Status:", size=(20, 1)), 
+            sg.Combo(status_opcoes, default_value=valores_padrao["status"], 
+                    key="status", size=(18, 1))],
+            [sg.Text("Caminhoneiro:", size=(20, 1)), 
+            sg.Combo(caminhoneiro_opcoes, default_value=valores_padrao["caminhoneiro"], 
+                    key="caminhoneiro", size=(30, 1), disabled=modo_atualizacao_status)],
+            [sg.Text("Caminhão:", size=(20, 1)), 
+            sg.Combo(caminhao_opcoes, default_value=valores_padrao["caminhao"], 
+                    key="caminhao", size=(30, 1), disabled=modo_atualizacao_status)],
+            [sg.Button(texto_botao, button_color=("white", "#5F41D9"), size=(15, 1)),
+            sg.Button("Voltar", button_color=("white", "#C0C0C0"), size=(15, 1))]
         ]
 
         self.__window = sg.Window(titulo, layout, resizable=True)
@@ -92,6 +99,9 @@ class TelaCadastroFrete:
             
             elif evento == "add_carga":
                 sg.popup("Abrir formulário de carga separado aqui.")  # Aqui você pode chamar outra tela específica para Carga.
+            elif evento in ("Cadastrar", "Atualizar", "Atualizar Status"):
+                self.__window.close()
+                return valores
 
     def fechar(self):
         if self.__window:
