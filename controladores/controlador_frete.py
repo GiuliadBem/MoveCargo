@@ -2,6 +2,7 @@ from telas.tela_fretes import TelaFrete
 from telas.tela_cadastro_frete import TelaCadastroFrete
 from modelos.frete import Frete
 from daos.frete_dao import FreteDAO
+from enums.status import Status
 
 class ControladorFrete:
     def __init__(self, controlador_sistema):
@@ -25,38 +26,31 @@ class ControladorFrete:
         lista_caminhoes = self.__controlador_sistema.controlador_caminhao.lista_caminhoes
         lista_caminhoneiros = self.__controlador_sistema.controlador_caminhoneiro.lista_caminhoneiros
         
-        dados = self.__tela_cadastro_frete.pega_dados_cadastro(lista_caminhoneiros, lista_caminhoes)
+        dados = self.__tela_cadastro_frete.pega_dados_frete(lista_caminhoneiros, lista_caminhoes)
         
-        if dados is None:
+        if dados == None:
             self.__tela_frete.mostrar_mensagem("Cadastro cancelado.")
             return
-
-        # Valida campos obrigatórios no controlador
-        campos_obrigatorios = ["origem", "destino", "distancia", "caminhoneiro", "caminhao", "carga"]
-        for campo in campos_obrigatorios:
-            if campo not in dados or not dados[campo]:
-                self.__tela_frete.mostrar_mensagem(f"Erro: Campo '{campo}' é obrigatório.")
-                return
 
         try:
             cria_id = len(self.lista_fretes)
             while self.procura_frete_por_id(cria_id) is not None:
                 cria_id += 1
 
-            carga = Carga(**dados["carga"])
-            observacoes = [Observacao(**obs) for obs in dados.get("observacoes", [])]
+            carga = dados["carga"] #Carga(**dados["carga"])
+            observacoes =  "" #[Observacao(**obs) for obs in dados.get("observacoes", [])] 
             caminhao = dados["caminhao"]
             caminhoneiro = dados["caminhoneiro"]
 
             # Validação de compatibilidade caminhão/carga
-            if carga.tipo != caminhao.tipo_carga:
-                self.__tela_frete.mostrar_mensagem("Erro: Caminhão incompatível com o tipo de carga.")
-                return
+            #if carga.tipo != caminhao.tipo_carga:
+             #   self.__tela_frete.mostrar_mensagem("Erro: Caminhão incompatível com o tipo de carga.")
+              #  return
 
             # Validação de carga perigosa
-            if carga.carga_perigosa and not caminhoneiro.possui_mopp:
-                self.__tela_frete.mostrar_mensagem("Erro: Caminhoneiro não possui licença MOPP para carga perigosa.")
-                return
+            #if carga.carga_perigosa and not caminhoneiro.possui_mopp:
+              #  self.__tela_frete.mostrar_mensagem("Erro: Caminhoneiro não possui licença MOPP para carga perigosa.")
+                #return
 
             novo_frete = Frete(
                 id=cria_id,
@@ -142,23 +136,27 @@ class ControladorFrete:
         else:
             self.__tela_frete.mostrar_mensagem("Exclusão cancelada.")
 
-    def listar_fretes(self):
+    def listar_fretes_gerente(self):
+
         dados_exibicao = []
-        for f in self.lista_fretes:
+
+        for frete in self.lista_fretes:
             dados_exibicao.append({
-                "id": f.id,
-                "origem": f.origem,
-                "destino": f.destino,
-                "status": f.status.name,
+                "id": frete.id,
+                #"carga": frete.carga.tipo.name,
+                "caminhoneiro": frete.caminhoneiro.nome,
+                "status": frete.status.name,
             })
-        return self.__tela_frete.mostrar_fretes(dados_exibicao)
+        return self.__tela_frete.mostrar_fretes(dados_exibicao, "gerente")
 
     def retornar(self):
         self.__controlador_sistema.abre_tela()
 
-    def opcoes_frete(self):
+    def opcoes_frete(self, usuario):
         while True:
-            opcao = self.listar_fretes()
+
+            if usuario == "Gerente":
+                opcao = self.listar_fretes_gerente()
 
             if opcao == "cadastrar":
                 self.incluir_frete()

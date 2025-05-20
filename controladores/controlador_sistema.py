@@ -68,7 +68,7 @@ class ControladorSistema:
             botao = self.__tela_sistema.mostra_tela(self.sessao.usuario_atual.usuario) # type: ignore
             match botao:
                 # Botões Gerente
-                case "Fretes": self.controlador_frete.opcoes_frete()
+                case "Fretes": self.controlador_frete.opcoes_frete("Gerente")
                 case "Caminhoneiros": self.controlador_caminhoneiro.opcoes_caminhoneiro()
                 case "Caminhões": self.controlador_caminhao.opcoes_caminhao()
                 case "Relatórios": pass
