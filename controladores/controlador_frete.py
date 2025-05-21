@@ -37,20 +37,21 @@ class ControladorFrete:
             while self.procura_frete_por_id(cria_id) is not None:
                 cria_id += 1
 
-            carga = dados["carga"] #Carga(**dados["carga"])
-            observacoes =  "" #[Observacao(**obs) for obs in dados.get("observacoes", [])] 
+            # Temporariamente, vamos usar uma carga vazia
+            carga = None  #carga = dados["carga"] #Carga(**dados["carga"])
+            observacoes = ""  # [Observacao(**obs) for obs in dados.get("observacoes", [])] 
             caminhao = dados["caminhao"]
             caminhoneiro = dados["caminhoneiro"]
 
-            # Validação de compatibilidade caminhão/carga
+            # Validação de compatibilidade caminhão/carga - temporariamente desativada
             #if carga.tipo != caminhao.tipo_carga:
-             #   self.__tela_frete.mostrar_mensagem("Erro: Caminhão incompatível com o tipo de carga.")
-              #  return
+            #    self.__tela_frete.mostrar_mensagem("Erro: Caminhão incompatível com o tipo de carga.")
+            #    return
 
-            # Validação de carga perigosa
+            # Validação de carga perigosa - temporariamente desativada
             #if carga.carga_perigosa and not caminhoneiro.possui_mopp:
-              #  self.__tela_frete.mostrar_mensagem("Erro: Caminhoneiro não possui licença MOPP para carga perigosa.")
-                #return
+            #    self.__tela_frete.mostrar_mensagem("Erro: Caminhoneiro não possui licença MOPP para carga perigosa.")
+            #    return
 
             novo_frete = Frete(
                 id=cria_id,
@@ -62,7 +63,10 @@ class ControladorFrete:
                 observacoes=observacoes,
                 caminhoneiro=caminhoneiro,
                 caminhao=caminhao,
-                carga=carga
+                carga=carga,
+                # -- Atualizar Status Frete --------------------------------------------------------------------------- #
+                prazo_entrega=dados["prazo_entrega"]
+                # ----------------------------------------------------------------------------------------------------- #
             )
 
             self.__frete_dao.add(novo_frete)
@@ -192,7 +196,7 @@ class ControladorFrete:
             return
 
         # Obter os novos dados usando a tela de cadastro em modo de atualização de status
-        dados = self.__tela_cadastro_frete.pega_dados_cadastro(
+        dados = self.__tela_cadastro_frete.pega_dados_frete(
             self.__controlador_sistema.controlador_caminhoneiro.lista_caminhoneiros,
             self.__controlador_sistema.controlador_caminhao.lista_caminhoes,
             frete,

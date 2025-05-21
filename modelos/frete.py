@@ -1,6 +1,6 @@
 class Frete:
     def __init__(self, id: int, origem: str, destino: str, motivo_cancelamento: str,
-                 distancia: int, status, observacoes: list, caminhoneiro, caminhao, carga):
+                 distancia: int, status, observacoes: list, caminhoneiro, caminhao, carga, prazo_entrega=None):
         self.__id = id
         self.__origem = origem
         self.__destino = destino
@@ -11,6 +11,7 @@ class Frete:
         self.__caminhoneiro = caminhoneiro
         self.__caminhao = caminhao
         self.__carga = carga
+        self.__prazo_entrega = prazo_entrega
 
     # Getters
 
@@ -54,6 +55,10 @@ class Frete:
     def carga(self):
         return self.__carga
 
+    @property
+    def prazo_entrega(self):
+        return self.__prazo_entrega
+
     # Setters
 
     @origem.setter
@@ -91,3 +96,7 @@ class Frete:
     @carga.setter
     def carga(self, carga):
         self.__carga = carga
+
+    @prazo_entrega.setter
+    def prazo_entrega(self, prazo_entrega):
+        self.__prazo_entrega = prazo_entrega

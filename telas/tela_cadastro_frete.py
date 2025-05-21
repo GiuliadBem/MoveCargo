@@ -1,5 +1,6 @@
 import FreeSimpleGUI as sg
 from enums.status import Status
+from datetime import datetime
 
 class TelaCadastroFrete:
     def __init__(self):
@@ -25,6 +26,9 @@ class TelaCadastroFrete:
             "caminhoneiro": f"{frete.caminhoneiro.id} - {frete.caminhoneiro.nome}" if frete else '',
             "caminhao": f"{frete.caminhao.id} - {frete.caminhao.modelo} ({frete.caminhao.placa})" if frete else '',
             "carga": "",  # Pode ser um ID
+            # -- Atualizar Status Frete --------------------------------------------------------------------------- #
+            "prazo_entrega": frete.prazo_entrega.strftime("%d/%m/%Y %H:%M") if frete and frete.prazo_entrega else ""
+            # ----------------------------------------------------------------------------------------------------- #
         }
         
         if frete:
@@ -60,6 +64,16 @@ class TelaCadastroFrete:
             [sg.Text("Caminhão:", size=(20, 1)), 
             sg.Combo(caminhao_opcoes, default_value=valores_padrao["caminhao"], 
                     key="caminhao", size=(30, 1), disabled=modo_atualizacao_status)],
+            # -- Atualizar Status Frete ------------------------------------------------------------------------------------------- #
+            [sg.Text("Prazo de Entrega:", size=(20, 1)),
+            sg.InputText(key="prazo_entrega", default_text=valores_padrao["prazo_entrega"].split(" ")[0] if valores_padrao["prazo_entrega"] else "",
+                        disabled=modo_atualizacao_status, size=(18, 1)),
+            sg.CalendarButton("📅", target="prazo_entrega", format="%d/%m/%Y", 
+                            disabled=modo_atualizacao_status),
+            sg.InputText(key="hora_entrega", default_text=valores_padrao["prazo_entrega"].split(" ")[1] if valores_padrao["prazo_entrega"] else "",
+                        disabled=modo_atualizacao_status, size=(8, 1)),
+            sg.Text("(HH:MM)", size=(8, 1), text_color="gray")],
+            # --------------------------------------------------------------------------------------------------------------------- #
             [sg.Button(texto_botao, button_color=("white", "#5F41D9"), size=(15, 1)),
             sg.Button("Voltar", button_color=("white", "#C0C0C0"), size=(15, 1))]
         ]
@@ -75,7 +89,7 @@ class TelaCadastroFrete:
            
             elif evento in ("Cadastrar", "Atualizar"):
                 # Valida campos obrigatórios antes de retornar
-                campos_obrigatorios = ["origem", "destino", "distancia", "status", "caminhoneiro", "caminhao"] #Add carga depois
+                campos_obrigatorios = ["origem", "destino", "distancia", "status", "caminhoneiro", "caminhao", "prazo_entrega", "hora_entrega"]
 
                 for campo in campos_obrigatorios:
                     if not valores.get(campo) or valores[campo].strip() == "":
@@ -85,6 +99,15 @@ class TelaCadastroFrete:
                     # Se passou por todos os campos: retorna
                     valores["caminhoneiro"] = caminhoneiro_map.get(valores["caminhoneiro"])
                     valores["caminhao"] = caminhao_map.get(valores["caminhao"])
+                    # -- Atualizar Status Frete --------------------------------------------------------------------------- #
+                    # Converte a string da data e hora para objeto datetime
+                    try:
+                        data_hora = f"{valores['prazo_entrega']} {valores['hora_entrega']}"
+                        valores["prazo_entrega"] = datetime.strptime(data_hora, "%d/%m/%Y %H:%M")
+                    except ValueError:
+                        sg.popup("Formato de data/hora inválido. Use o formato dd/mm/aaaa HH:MM.", title="Erro")
+                        continue
+                    # ----------------------------------------------------------------------------------------------------- #
                     self.__window.close()
                     return valores
             

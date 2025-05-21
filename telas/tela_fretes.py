@@ -118,7 +118,7 @@ class TelaFrete:
                     sg.Text(frete["origem"], size=(15, 1)),
                     sg.Text(frete["destino"], size=(15, 1)),
                     sg.Text(frete["status"], size=(12, 1)),
-                    sg.Text(str(frete["prazo_entrega"]), size=(15, 1)),
+                    sg.Text(frete["prazo_entrega"].strftime("%d/%m/%Y %H:%M") if frete["prazo_entrega"] else "Não definido", size=(15, 1)),
                     sg.Button("Atualizar Status", key=f"atualizar_{frete['id']}", size=(15, 1))
                 ])
 
