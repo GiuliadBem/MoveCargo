@@ -83,31 +83,38 @@ class TelaCadastroFrete:
         while True:
             evento, valores = self.__window.read()
             
-            if evento in (sg.WINDOW_CLOSED, "VOLTAR"):
+            if evento in (sg.WINDOW_CLOSED, "Voltar"):
                 self.__window.close()
                 return None
            
-            elif evento in ("Cadastrar", "Atualizar"):
-                # Valida campos obrigatórios antes de retornar
-                campos_obrigatorios = ["origem", "destino", "distancia", "status", "caminhoneiro", "caminhao", "prazo_entrega", "hora_entrega"]
+            elif evento in ("Cadastrar", "Atualizar", "Atualizar Status"):
+                # Valida campos obrigatórios apenas se não estiver no modo de atualização de status
+                if not modo_atualizacao_status:
+                    campos_obrigatorios = ["origem", "destino", "distancia", "status", "caminhoneiro", "caminhao", "prazo_entrega", "hora_entrega"]
 
-                for campo in campos_obrigatorios:
-                    if not valores.get(campo) or valores[campo].strip() == "":
-                        sg.popup(f"O campo '{campo}' é obrigatório.", title="Campo obrigatório")
-                        break
+                    for campo in campos_obrigatorios:
+                        if not valores.get(campo) or valores[campo].strip() == "":
+                            sg.popup(f"O campo '{campo}' é obrigatório.", title="Campo obrigatório")
+                            break
+                    else:
+                        # Se passou por todos os campos: retorna
+                        valores["caminhoneiro"] = caminhoneiro_map.get(valores["caminhoneiro"])
+                        valores["caminhao"] = caminhao_map.get(valores["caminhao"])
+                        # -- Atualizar Status Frete --------------------------------------------------------------------------- #
+                        # Converte a string da data e hora para objeto datetime
+                        try:
+                            data_hora = f"{valores['prazo_entrega']} {valores['hora_entrega']}"
+                            valores["prazo_entrega"] = datetime.strptime(data_hora, "%d/%m/%Y %H:%M")
+                        except ValueError:
+                            sg.popup("Formato de data/hora inválido. Use o formato dd/mm/aaaa HH:MM.", title="Erro")
+                            continue
+                        # ----------------------------------------------------------------------------------------------------- #
+                        self.__window.close()
+                        return valores
                 else:
-                    # Se passou por todos os campos: retorna
+                    # No modo de atualização de status, retorna diretamente os valores
                     valores["caminhoneiro"] = caminhoneiro_map.get(valores["caminhoneiro"])
                     valores["caminhao"] = caminhao_map.get(valores["caminhao"])
-                    # -- Atualizar Status Frete --------------------------------------------------------------------------- #
-                    # Converte a string da data e hora para objeto datetime
-                    try:
-                        data_hora = f"{valores['prazo_entrega']} {valores['hora_entrega']}"
-                        valores["prazo_entrega"] = datetime.strptime(data_hora, "%d/%m/%Y %H:%M")
-                    except ValueError:
-                        sg.popup("Formato de data/hora inválido. Use o formato dd/mm/aaaa HH:MM.", title="Erro")
-                        continue
-                    # ----------------------------------------------------------------------------------------------------- #
                     self.__window.close()
                     return valores
             
@@ -122,9 +129,6 @@ class TelaCadastroFrete:
             
             elif evento == "add_carga":
                 sg.popup("Abrir formulário de carga separado aqui.")  # Aqui você pode chamar outra tela específica para Carga.
-            elif evento in ("Cadastrar", "Atualizar", "Atualizar Status"):
-                self.__window.close()
-                return valores
 
     def fechar(self):
         if self.__window:
