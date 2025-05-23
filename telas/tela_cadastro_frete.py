@@ -52,12 +52,18 @@ class TelaCadastroFrete:
             [sg.Text("Destino:", size=(20, 1)), 
             sg.InputText(key="destino", default_text=valores_padrao["destino"], 
                         disabled=modo_atualizacao_status)],
+            
+            [sg.Text("Carga:", size=(12, 1)),
+             sg.Multiline(default_text=valores_padrao["carga"], size=(40, 4), disabled=True, key="carga_display"),
+             sg.Button("ADICIONAR CARGA", key="add_carga", size=(18,1))],
+
             [sg.Text("Distância (km):", size=(20, 1)), 
             sg.InputText(key="distancia", default_text=str(valores_padrao["distancia"]), 
                         disabled=modo_atualizacao_status)],
             [sg.Text("Status:", size=(20, 1)), 
             sg.Combo(status_opcoes, default_value=valores_padrao["status"], 
                     key="status", size=(18, 1))],
+            
             [sg.Text("Caminhoneiro:", size=(20, 1)), 
             sg.Combo(caminhoneiro_opcoes, default_value=valores_padrao["caminhoneiro"], 
                     key="caminhoneiro", size=(30, 1), disabled=modo_atualizacao_status)],
@@ -74,6 +80,10 @@ class TelaCadastroFrete:
                         disabled=modo_atualizacao_status, size=(8, 1)),
             sg.Text("(HH:MM)", size=(8, 1), text_color="gray")],
             # --------------------------------------------------------------------------------------------------------------------- #
+            [sg.Text("Observações:", size=(12, 1)),
+             sg.Multiline("\n".join(observacoes_adicionadas), size=(40, 4), disabled=True, key="observacoes_display"),
+             sg.Button("ADICIONAR OBSERVAÇÃO", key="add_observacao", size=(22, 2), button_color=("white", "#5F41D9"))],
+            
             [sg.Button(texto_botao, button_color=("white", "#5F41D9"), size=(15, 1)),
             sg.Button("Voltar", button_color=("white", "#C0C0C0"), size=(15, 1))]
         ]
@@ -129,6 +139,14 @@ class TelaCadastroFrete:
             
             elif evento == "add_carga":
                 sg.popup("Abrir formulário de carga separado aqui.")  # Aqui você pode chamar outra tela específica para Carga.
+
+    def formatar_resumo_carga(self, carga):
+        if not carga:
+            return "Nenhuma carga definida."
+        return (f"Tipo: {carga.tipo.name}\n"
+                f"Quantidade: {carga.quantidade}\n"
+                f"Descrição: {carga.descricao}\n"
+                f"Perigosa: {'Sim' if carga.carga_perigosa else 'Não'}")
 
     def fechar(self):
         if self.__window:
