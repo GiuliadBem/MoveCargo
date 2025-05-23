@@ -72,6 +72,7 @@ class ControladorSistema:
                 case "Caminhoneiros": self.controlador_caminhoneiro.opcoes_caminhoneiro()
                 case "Caminhões": self.controlador_caminhao.opcoes_caminhao()
                 case "Relatórios": pass
+                case "Atualizar Status": self.controlador_frete.opcoes_frete("Gerente", modo_atualizacao_status=True)
 
                 # Botões Caminhoneiro
                 case "Meus Fretes": self.controlador_frete.opcoes_meus_fretes(self.sessao.usuario_atual.id)

@@ -19,6 +19,7 @@ class TelaSistema:
                 [sg.Button("Caminhoneiros", size=(15, 2))],
                 [sg.Button("Caminhões", size=(15, 2))],
                 [sg.Button("Relatórios", size=(15, 2))],
+                [sg.Button("Atualizar Status", size=(15, 2))],
                 [sg.VPush()],
                 [sg.Button("Sair", size=(15, 1))]
             ]
@@ -34,7 +35,7 @@ class TelaSistema:
             ]
 
         # Configurações da Tela
-        self.__window = sg.Window("Sistema de Fretes", layout, size=(300, 300), element_justification='c')
+        self.__window = sg.Window("Sistema de Fretes", layout, size=(300, 550), element_justification='c')
 
     def fechar(self):
         # Fecha a tela, caso aberta

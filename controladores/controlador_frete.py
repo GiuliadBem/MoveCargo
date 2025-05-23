@@ -1,5 +1,6 @@
 from telas.tela_fretes import TelaFrete
 from telas.tela_cadastro_frete import TelaCadastroFrete
+from telas.tela_atualizacao_status import TelaAtualizacaoStatus
 from modelos.frete import Frete
 from daos.frete_dao import FreteDAO
 from enums.status import Status
@@ -10,6 +11,7 @@ class ControladorFrete:
         self.__frete_dao = FreteDAO()
         self.__tela_frete = TelaFrete()
         self.__tela_cadastro_frete = TelaCadastroFrete()
+        self.__tela_atualizacao_status = TelaAtualizacaoStatus()
         self.__controlador_sistema = controlador_sistema
 
     @property
@@ -142,7 +144,6 @@ class ControladorFrete:
             self.__tela_frete.mostrar_mensagem("Exclusão cancelada.")
 
     def listar_fretes_gerente(self):
-
         dados_exibicao = []
 
         for frete in self.lista_fretes:
@@ -151,17 +152,21 @@ class ControladorFrete:
                 #"carga": frete.carga.tipo.name,
                 "caminhoneiro": frete.caminhoneiro.nome,
                 "status": frete.status.name,
+                "prazo_entrega": frete.prazo_entrega
             })
-        return self.__tela_frete.mostrar_fretes(dados_exibicao, "gerente")
+        return dados_exibicao
 
     def retornar(self):
         self.__controlador_sistema.abre_tela()
 
-    def opcoes_frete(self, usuario):
+    def opcoes_frete(self, usuario, modo_atualizacao_status=False):
         while True:
-
             if usuario == "Gerente":
-                opcao = self.listar_fretes_gerente()
+                if modo_atualizacao_status:
+                    lista_fretes = self.listar_fretes_gerente()
+                    opcao = self.__tela_atualizacao_status.mostrar_fretes_para_atualizacao(lista_fretes)
+                else:
+                    opcao = self.__tela_frete.mostrar_fretes(self.listar_fretes_gerente(), "gerente")
 
             if opcao == "cadastrar":
                 self.incluir_frete()
@@ -171,9 +176,10 @@ class ControladorFrete:
 
                 if opcao["acao"] == "editar":
                     self.atualizar_frete(id_frete)
-
                 elif opcao["acao"] == "excluir":
                     self.excluir_frete(id_frete)
+                elif opcao["acao"] == "atualizar" and modo_atualizacao_status:
+                    self.atualizar_status_frete_gerente(id_frete)
 
             elif opcao == "voltar":
                 break
@@ -191,12 +197,12 @@ class ControladorFrete:
             self.__tela_frete.mostrar_mensagem("Você não tem permissão para atualizar este frete.")
             return
 
-        # Verificar se o frete está em um status final
-        if frete.status in [Status.CONCLUIDO, Status.CANCELADO]:
-            self.__tela_frete.mostrar_mensagem("Este frete já está finalizado e não pode ser alterado.")
+        # Verificar se o frete está ativo
+        if frete.status not in [Status.NAO_INICIADO, Status.EM_ANDAMENTO, Status.SUSPENSO]:
+            self.__tela_frete.mostrar_mensagem("Este frete não está ativo.")
             return
 
-        # Verificar se o prazo de entrega expirou
+        # Verificar se o prazo expirou
         if frete.prazo_entrega and datetime.now() > frete.prazo_entrega:
             self.__tela_frete.mostrar_mensagem("O prazo de entrega expirou. Apenas o gerente pode atualizar o status.")
             return
@@ -214,18 +220,44 @@ class ControladorFrete:
             return
 
         # Atualizar apenas o status
-        novo_status = Status[dados["status"]]
-        
-        # Verificar se o novo status é final
-        if novo_status in [Status.CONCLUIDO, Status.CANCELADO]:
-            if frete.prazo_entrega and datetime.now() > frete.prazo_entrega:
-                self.__tela_frete.mostrar_mensagem("Não é possível finalizar um frete após o prazo de entrega.")
-                return
-
-        frete.status = novo_status
+        frete.status = Status[dados["status"]]
         self.__frete_dao.update(frete)
         self.__tela_frete.mostrar_mensagem("Status atualizado com sucesso!")
-    
+
+    def atualizar_status_frete_gerente(self, id_frete):
+        frete = self.procura_frete_por_id(id_frete)
+
+        if not frete:
+            self.__tela_frete.mostrar_mensagem("Frete não encontrado.")
+            return
+
+        # Verificar se o prazo expirou
+        if not frete.prazo_entrega or datetime.now() <= frete.prazo_entrega:
+            self.__tela_frete.mostrar_mensagem("O prazo de entrega ainda não expirou. Apenas o caminhoneiro pode atualizar o status.")
+            return
+
+        # Verificar se o status já está finalizado
+        if frete.status in [Status.CONCLUIDO, Status.CANCELADO]:
+            self.__tela_frete.mostrar_mensagem("Este frete já está finalizado e não pode ser alterado.")
+            return
+
+        # Obter os novos dados usando a tela de cadastro em modo de atualização de status
+        dados = self.__tela_cadastro_frete.pega_dados_frete(
+            self.__controlador_sistema.controlador_caminhoneiro.lista_caminhoneiros,
+            self.__controlador_sistema.controlador_caminhao.lista_caminhoes,
+            frete,
+            modo_atualizacao_status=True
+        )
+
+        if dados is None:
+            self.__tela_frete.mostrar_mensagem("Atualização cancelada.")
+            return
+
+        # Atualizar apenas o status
+        frete.status = Status[dados["status"]]
+        self.__frete_dao.update(frete)
+        self.__tela_frete.mostrar_mensagem("Status atualizado com sucesso!")
+
     def listar_meus_fretes(self, id_caminhoneiro):
         dados_exibicao = []
         for f in self.lista_fretes:
