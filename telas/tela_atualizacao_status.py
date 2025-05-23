@@ -9,7 +9,7 @@ class TelaAtualizacaoStatus:
 
         # Título
         layout.append([
-            sg.Text("Atualizar Status dos Fretes", font=("Arial", 20), justification="center", expand_x=True)
+            sg.Text("Atualizar Status dos Fretes", font=("Arial", 20), expand_x=True)
         ])
 
         # Verifica se lista está vazia
@@ -17,18 +17,20 @@ class TelaAtualizacaoStatus:
             layout.append([sg.Text("⚠️ Nenhum frete encontrado.", text_color="red")])
         else:
             layout.append([
-                sg.Text("ID", size=(5, 1)),
-                sg.Text("Caminhoneiro", size=(20, 1)),
-                sg.Text("Status", size=(15, 1)),
-                sg.Text("Prazo", size=(15, 1)),
-                sg.Text("Ações", size=(10, 1)),
+                sg.Text("ID", size=(5, 1), justification='center', font=('Arial', 12, 'bold')),
+                sg.Text("Caminhoneiro", size=(20, 1), justification='center', font=('Arial', 12, 'bold')),
+                sg.Text("Status", size=(15, 1), justification='center', font=('Arial', 12, 'bold')),
+                sg.Text("Prazo", size=(15, 1), justification='center', font=('Arial', 12, 'bold')),
+                sg.Text("Ações", size=(20, 1), justification='right', font=('Arial', 12, 'bold')),
             ])
+            layout.append([sg.HorizontalSeparator()])
             for frete in lista_fretes:
                 layout.append([
-                    sg.Text(str(frete["id"]), size=(5, 1)),
-                    sg.Text(frete["caminhoneiro"], size=(20, 1)),
-                    sg.Text(frete["status"], size=(15, 1)),
-                    sg.Text(frete["prazo_entrega"].strftime("%d/%m/%Y %H:%M") if frete["prazo_entrega"] else "Não definido", size=(15, 1)),
+                    sg.Text(str(frete["id"]), size=(5, 1), justification='center'),
+                    sg.Text(frete["caminhoneiro"], size=(24, 1), justification='center'),
+                    sg.Text(frete["status"], size=(16, 1), justification='center'),
+                    sg.Text(frete["prazo_entrega"].strftime("%d/%m/%Y %H:%M") if frete["prazo_entrega"] else "Não definido", size=(17, 1), justification='center'),
+                    sg.Text("", size=(12, 1), justification='center'),
                     sg.Button("Atualizar", key=f"atualizar_{frete['id']}", size=(10, 1))
                 ])
 
