@@ -67,9 +67,9 @@ class ControladorFrete:
                 caminhoneiro=caminhoneiro,
                 caminhao=caminhao,
                 carga=carga,
-                # -- Atualizar Status Frete --------------------------------------------------------------------------- #
+                # -- Atualizar Status Frete ----------------------------------------------------------------------------------------------------------------------------------------------- #
                 prazo_entrega=dados["prazo_entrega"]
-                # ----------------------------------------------------------------------------------------------------- #
+                # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
             )
 
             self.__frete_dao.add(novo_frete)
@@ -156,6 +156,24 @@ class ControladorFrete:
             })
         return dados_exibicao
 
+    # -- Atualizar Status Frete ----------------------------------------------------------------------------------------------------------------------------------------------- #
+    def listar_fretes_para_atualizacao_gerente(self):
+        dados_exibicao = []
+
+        for frete in self.lista_fretes:
+            # Verifica se o prazo expirou e se o frete não está finalizado
+            if (frete.prazo_entrega and datetime.now() > frete.prazo_entrega and 
+                frete.status not in [Status.CONCLUIDO, Status.CANCELADO]):
+                dados_exibicao.append({
+                    "id": frete.id,
+                    #"carga": frete.carga.tipo.name,
+                    "caminhoneiro": frete.caminhoneiro.nome,
+                    "status": frete.status.name,
+                    "prazo_entrega": frete.prazo_entrega
+                })
+        return dados_exibicao
+    # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
+
     def retornar(self):
         self.__controlador_sistema.abre_tela()
 
@@ -163,7 +181,7 @@ class ControladorFrete:
         while True:
             if usuario == "Gerente":
                 if modo_atualizacao_status:
-                    lista_fretes = self.listar_fretes_gerente()
+                    lista_fretes = self.listar_fretes_para_atualizacao_gerente()
                     opcao = self.__tela_atualizacao_status.mostrar_fretes_para_atualizacao(lista_fretes)
                 else:
                     opcao = self.__tela_frete.mostrar_fretes(self.listar_fretes_gerente(), "gerente")
