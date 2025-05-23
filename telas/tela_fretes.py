@@ -1,4 +1,5 @@
 import FreeSimpleGUI as sg
+from datetime import datetime
 
 class TelaFrete:
     def __init__(self):
@@ -113,13 +114,28 @@ class TelaFrete:
             ])
 
             for frete in lista_fretes:
+                # Verifica se o frete está fora do prazo
+                prazo_expirado = frete["prazo_entrega"] and datetime.now() > frete["prazo_entrega"]
+                status_final = frete["status"] in ["CONCLUIDO", "CANCELADO"]
+                
+                # Define a cor do texto baseado no status e prazo
+                text_color = "red" if prazo_expirado and not status_final else "black"
+                
+                # Define se o botão de atualizar status deve estar habilitado
+                botao_atualizar = sg.Button("Atualizar Status", 
+                                          key=f"atualizar_{frete['id']}", 
+                                          size=(15, 1),
+                                          disabled=(prazo_expirado or status_final))
+
                 layout.append([
-                    sg.Text(str(frete["id"]), size=(5, 1)),
-                    sg.Text(frete["origem"], size=(15, 1)),
-                    sg.Text(frete["destino"], size=(15, 1)),
-                    sg.Text(frete["status"], size=(12, 1)),
-                    sg.Text(frete["prazo_entrega"].strftime("%d/%m/%Y %H:%M") if frete["prazo_entrega"] else "Não definido", size=(15, 1)),
-                    sg.Button("Atualizar Status", key=f"atualizar_{frete['id']}", size=(15, 1))
+                    sg.Text(str(frete["id"]), size=(5, 1), text_color=text_color),
+                    sg.Text(frete["origem"], size=(15, 1), text_color=text_color),
+                    sg.Text(frete["destino"], size=(15, 1), text_color=text_color),
+                    sg.Text(frete["status"], size=(12, 1), text_color=text_color),
+                    sg.Text(frete["prazo_entrega"].strftime("%d/%m/%Y %H:%M") if frete["prazo_entrega"] else "Não definido", 
+                           size=(15, 1), 
+                           text_color=text_color),
+                    botao_atualizar
                 ])
 
         layout.append([sg.Push(), sg.Button("VOLTAR", key="voltar", size=(15, 1), font=("Arial", 12)), sg.Push()])

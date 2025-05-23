@@ -3,6 +3,7 @@ from telas.tela_cadastro_frete import TelaCadastroFrete
 from modelos.frete import Frete
 from daos.frete_dao import FreteDAO
 from enums.status import Status
+from datetime import datetime
 
 class ControladorFrete:
     def __init__(self, controlador_sistema):
@@ -190,9 +191,14 @@ class ControladorFrete:
             self.__tela_frete.mostrar_mensagem("Você não tem permissão para atualizar este frete.")
             return
 
-        # Verificar se o frete está ativo
-        if frete.status not in [Status.NAO_INICIADO, Status.EM_ANDAMENTO, Status.SUSPENSO]:
-            self.__tela_frete.mostrar_mensagem("Este frete não está ativo.")
+        # Verificar se o frete está em um status final
+        if frete.status in [Status.CONCLUIDO, Status.CANCELADO]:
+            self.__tela_frete.mostrar_mensagem("Este frete já está finalizado e não pode ser alterado.")
+            return
+
+        # Verificar se o prazo de entrega expirou
+        if frete.prazo_entrega and datetime.now() > frete.prazo_entrega:
+            self.__tela_frete.mostrar_mensagem("O prazo de entrega expirou. Apenas o gerente pode atualizar o status.")
             return
 
         # Obter os novos dados usando a tela de cadastro em modo de atualização de status
@@ -208,7 +214,15 @@ class ControladorFrete:
             return
 
         # Atualizar apenas o status
-        frete.status = Status[dados["status"]]
+        novo_status = Status[dados["status"]]
+        
+        # Verificar se o novo status é final
+        if novo_status in [Status.CONCLUIDO, Status.CANCELADO]:
+            if frete.prazo_entrega and datetime.now() > frete.prazo_entrega:
+                self.__tela_frete.mostrar_mensagem("Não é possível finalizar um frete após o prazo de entrega.")
+                return
+
+        frete.status = novo_status
         self.__frete_dao.update(frete)
         self.__tela_frete.mostrar_mensagem("Status atualizado com sucesso!")
     
