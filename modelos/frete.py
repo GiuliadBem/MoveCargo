@@ -1,5 +1,7 @@
+from enums.motivo_cancelamento import MotivoCancelamento
+
 class Frete:
-    def __init__(self, id: int, origem: str, destino: str, motivo_cancelamento: str,
+    def __init__(self, id: int, origem: str, destino: str, motivo_cancelamento: MotivoCancelamento,
                  distancia: int, status, observacoes: list, caminhoneiro, caminhao, carga, prazo_entrega=None):
         self.__id = id
         self.__origem = origem

@@ -4,6 +4,7 @@ from telas.tela_atualizacao_status import TelaAtualizacaoStatus
 from modelos.frete import Frete
 from daos.frete_dao import FreteDAO
 from enums.status import Status
+from enums.motivo_cancelamento import MotivoCancelamento
 from datetime import datetime
 
 class ControladorFrete:
@@ -168,6 +169,8 @@ class ControladorFrete:
                     "id": frete.id,
                     #"carga": frete.carga.tipo.name,
                     "caminhoneiro": frete.caminhoneiro.nome,
+                    "origem": frete.origem,
+                    "destino": frete.destino,
                     "status": frete.status.name,
                     "prazo_entrega": frete.prazo_entrega
                 })
@@ -182,7 +185,7 @@ class ControladorFrete:
             if usuario == "Gerente":
                 if modo_atualizacao_status:
                     lista_fretes = self.listar_fretes_para_atualizacao_gerente()
-                    opcao = self.__tela_atualizacao_status.mostrar_fretes_para_atualizacao(lista_fretes)
+                    opcao = self.__tela_atualizacao_status.mostrar_fretes_para_atualizacao(lista_fretes, perfil="gerente")
                 else:
                     opcao = self.__tela_frete.mostrar_fretes(self.listar_fretes_gerente(), "gerente")
 
@@ -237,8 +240,9 @@ class ControladorFrete:
             self.__tela_frete.mostrar_mensagem("Atualização cancelada.")
             return
 
-        # Atualizar apenas o status
+        # Atualizar o status e motivo do cancelamento
         frete.status = Status[dados["status"]]
+        frete.motivo_cancelamento = MotivoCancelamento[dados["motivo_cancelamento"]] if dados["status"] == "CANCELADO" else None
         self.__frete_dao.update(frete)
         self.__tela_frete.mostrar_mensagem("Status atualizado com sucesso!")
 
@@ -271,8 +275,9 @@ class ControladorFrete:
             self.__tela_frete.mostrar_mensagem("Atualização cancelada.")
             return
 
-        # Atualizar apenas o status
+        # Atualizar o status e motivo do cancelamento
         frete.status = Status[dados["status"]]
+        frete.motivo_cancelamento = MotivoCancelamento[dados["motivo_cancelamento"]] if dados["status"] == "CANCELADO" else None
         self.__frete_dao.update(frete)
         self.__tela_frete.mostrar_mensagem("Status atualizado com sucesso!")
 
@@ -280,14 +285,21 @@ class ControladorFrete:
         dados_exibicao = []
         for f in self.lista_fretes:
             if f.caminhoneiro.id == id_caminhoneiro:
+                # Verifica se o frete pode ser atualizado pelo caminhoneiro
+                pode_atualizar = (
+                    f.status in [Status.NAO_INICIADO, Status.EM_ANDAMENTO, Status.SUSPENSO] and
+                    (not f.prazo_entrega or datetime.now() <= f.prazo_entrega)
+                )
+                
                 dados_exibicao.append({
                     "id": f.id,
                     "origem": f.origem,
                     "destino": f.destino,
                     "status": f.status.name,
-                    "prazo_entrega": f.prazo_entrega  # Supondo que este campo existe
+                    "prazo_entrega": f.prazo_entrega,
+                    "pode_atualizar": pode_atualizar
                 })
-        return self.__tela_frete.mostrar_meus_fretes(dados_exibicao)
+        return self.__tela_atualizacao_status.mostrar_fretes_para_atualizacao(dados_exibicao, perfil="caminhoneiro")
     
     def opcoes_meus_fretes(self, id_caminhoneiro):
         while True:

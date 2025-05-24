@@ -82,15 +82,12 @@ class TelaFrete:
                 return {"acao": "excluir", "id": int(evento.split("_")[1])}
 
     def mostrar_mensagem(self, msg: str, titulo="Aviso"):
-        sg.popup(msg, title=titulo)
+        sg.popup(msg, title=titulo, font=("Arial", 12))
 
     def confirmar_exclusao(self, id_frete):
         resposta = sg.popup_yes_no(f"Tem certeza que deseja excluir o frete ID {id_frete}?",
                                     title="Confirmar Exclusão")
         return resposta == "Yes"
-
-    def mostrar_mensagem(self, mensagem: str, titulo: str = "Aviso"):
-        sg.popup(mensagem, title=titulo, font=("Arial", 12))
 
     # -- Atualizar Status do Frete -------------------------------------------------------------------------------------------------------------------------------------- #
     def mostrar_meus_fretes(self, lista_fretes: list[dict]):

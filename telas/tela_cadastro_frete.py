@@ -1,5 +1,6 @@
 import FreeSimpleGUI as sg
 from enums.status import Status
+from enums.motivo_cancelamento import MotivoCancelamento
 from datetime import datetime
 
 class TelaCadastroFrete:
@@ -17,6 +18,7 @@ class TelaCadastroFrete:
         caminhoneiro_opcoes = list(caminhoneiro_map.keys())
         caminhao_opcoes = list(caminhao_map.keys())
         status_opcoes = [s.name for s in Status]
+        motivo_opcoes = [m.name for m in MotivoCancelamento]
 
         valores_padrao = {
             "origem": frete.origem if frete else "",
@@ -26,6 +28,7 @@ class TelaCadastroFrete:
             "caminhoneiro": f"{frete.caminhoneiro.id} - {frete.caminhoneiro.nome}" if frete else '',
             "caminhao": f"{frete.caminhao.id} - {frete.caminhao.modelo} ({frete.caminhao.placa})" if frete else '',
             "carga": "",  # Pode ser um ID
+            "motivo_cancelamento": frete.motivo_cancelamento.name if frete and frete.motivo_cancelamento else "",
             # -- Atualizar Status Frete --------------------------------------------------------------------------- #
             "prazo_entrega": frete.prazo_entrega.strftime("%d/%m/%Y %H:%M") if frete and frete.prazo_entrega else ""
             # ----------------------------------------------------------------------------------------------------- #
@@ -44,6 +47,7 @@ class TelaCadastroFrete:
             titulo = "Edição de Frete" if frete else "Cadastro de Frete"
             texto_botao = "Atualizar" if frete else "Cadastrar"
 
+        # Layout base
         layout = [
             [sg.Text(titulo, font=("Arial", 16, "bold"), justification="center", expand_x=True)],
             [sg.Text("Origem:", size=(20, 1)), 
@@ -65,9 +69,16 @@ class TelaCadastroFrete:
              sg.InputText(key="distancia", default_text=str(valores_padrao["distancia"]), 
                          text_color="gray" if modo_atualizacao_status else None,
                          disabled=modo_atualizacao_status)],
+            
+            # Status
             [sg.Text("Status:", size=(20, 1)), 
              sg.Combo(status_opcoes, default_value=valores_padrao["status"], 
-                     key="status", size=(18, 1), readonly=True)],
+                     key="status", size=(18, 1), readonly=True, enable_events=True)],
+            
+            # Motivo do cancelamento (inicialmente invisível)
+            [sg.Text("Motivo do Cancelamento:", size=(20, 1), visible=False, key="motivo_label"),
+             sg.Combo(motivo_opcoes, default_value=valores_padrao["motivo_cancelamento"],
+                     key="motivo_cancelamento", size=(25, 1), readonly=True, visible=False)],
             
             [sg.Text("Caminhoneiro:", size=(20, 1)), 
              sg.Combo(caminhoneiro_opcoes, default_value=valores_padrao["caminhoneiro"], 
@@ -101,7 +112,12 @@ class TelaCadastroFrete:
             sg.Button("Voltar", button_color=("white", "#C0C0C0"), size=(15, 1))]
         ]
 
-        self.__window = sg.Window(titulo, layout, resizable=True)
+        self.__window = sg.Window(titulo, layout, size=(800, 600), resizable=True, finalize=True)
+
+        # Mostra o campo de motivo se o status inicial for CANCELADO
+        if valores_padrao["status"] == "CANCELADO":
+            self.__window["motivo_label"].update(visible=True)
+            self.__window["motivo_cancelamento"].update(visible=True)
 
         while True:
             evento, valores = self.__window.read()
@@ -109,6 +125,12 @@ class TelaCadastroFrete:
             if evento in (sg.WINDOW_CLOSED, "Voltar"):
                 self.__window.close()
                 return None
+            
+            elif evento == "status":
+                # Mostra/esconde o campo de motivo do cancelamento baseado no status selecionado
+                mostrar_motivo = valores["status"] == "CANCELADO"
+                self.__window["motivo_label"].update(visible=mostrar_motivo)
+                self.__window["motivo_cancelamento"].update(visible=mostrar_motivo, value="")
            
             elif evento in ("Cadastrar", "Atualizar", "Atualizar Status"):
                 # Valida campos obrigatórios apenas se não estiver no modo de atualização de status
@@ -135,7 +157,12 @@ class TelaCadastroFrete:
                         self.__window.close()
                         return valores
                 else:
-                    # No modo de atualização de status, retorna diretamente os valores
+                    # No modo de atualização de status, valida o motivo do cancelamento se necessário
+                    if valores["status"] == "CANCELADO" and not valores.get("motivo_cancelamento"):
+                        sg.popup("É necessário informar o motivo do cancelamento!", title="Campo obrigatório")
+                        continue
+                    
+                    # Se passou pela validação, retorna os valores
                     valores["caminhoneiro"] = caminhoneiro_map.get(valores["caminhoneiro"])
                     valores["caminhao"] = caminhao_map.get(valores["caminhao"])
                     self.__window.close()
