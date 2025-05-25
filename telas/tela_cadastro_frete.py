@@ -76,9 +76,10 @@ class TelaCadastroFrete:
                      key="status", size=(18, 1), readonly=True, enable_events=True)],
             
             # Motivo do cancelamento (inicialmente invisível)
-            [sg.Text("Motivo do Cancelamento:", size=(20, 1), visible=False, key="motivo_label"),
+            [sg.Text("Motivo do Cancelamento:", size=(20, 1), key="motivo_label", visible=False),
              sg.Combo(motivo_opcoes, default_value=valores_padrao["motivo_cancelamento"],
-                     key="motivo_cancelamento", size=(25, 1), readonly=True, visible=False)],
+                     key="motivo_cancelamento", size=(25, 1), readonly=True, visible=False,
+                     text_color="gray" if modo_atualizacao_status else None)],
             
             [sg.Text("Caminhoneiro:", size=(20, 1)), 
              sg.Combo(caminhoneiro_opcoes, default_value=valores_padrao["caminhoneiro"], 
@@ -112,7 +113,7 @@ class TelaCadastroFrete:
             sg.Button("Voltar", button_color=("white", "#C0C0C0"), size=(15, 1))]
         ]
 
-        self.__window = sg.Window(titulo, layout, size=(800, 600), resizable=True, finalize=True)
+        self.__window = sg.Window(titulo, layout, size=(650, 450), resizable=True, finalize=True)
 
         # Mostra o campo de motivo se o status inicial for CANCELADO
         if valores_padrao["status"] == "CANCELADO":
@@ -128,9 +129,14 @@ class TelaCadastroFrete:
             
             elif evento == "status":
                 # Mostra/esconde o campo de motivo do cancelamento baseado no status selecionado
-                mostrar_motivo = valores["status"] == "CANCELADO"
-                self.__window["motivo_label"].update(visible=mostrar_motivo)
-                self.__window["motivo_cancelamento"].update(visible=mostrar_motivo, value="")
+                if valores["status"] == "CANCELADO":
+                    self.__window["motivo_label"].update(visible=True)
+                    self.__window["motivo_cancelamento"].update(visible=True, value="", 
+                                                              text_color="gray" if modo_atualizacao_status else None)
+                else:
+                    self.__window["motivo_label"].update(visible=False)
+                    self.__window["motivo_cancelamento"].update(visible=False, value="", 
+                                                              text_color="gray" if modo_atualizacao_status else None)
            
             elif evento in ("Cadastrar", "Atualizar", "Atualizar Status"):
                 # Valida campos obrigatórios apenas se não estiver no modo de atualização de status
