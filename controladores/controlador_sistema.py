@@ -64,13 +64,14 @@ class ControladorSistema:
 
                 # Sair do programa
                 case "Sair": return
-
-        # Contagem de novas notificações
-        self.__controlador_notificacoes.listar_novas_notificacoes(self.sessao.usuario_atual)
+        
+        # Receber notificações
+        self.__controlador_notificacoes.receber_notificacoes(self.sessao.usuario_atual)
         
         # Fluxo do programa
         while True:
-            botao = self.__tela_sistema.mostra_tela(self.sessao.usuario_atual.usuario, 0) # type: ignore
+            num_notificacoes = len(self.__controlador_notificacoes.listar_notificacoes_nao_lidas(self.sessao.usuario_atual))
+            botao = self.__tela_sistema.mostra_tela(self.sessao.usuario_atual.usuario, num_notificacoes) # type: ignore
             match botao:
                 # Botões Gerente
                 case "Fretes": self.controlador_frete.opcoes_frete("Gerente")
@@ -84,5 +85,5 @@ class ControladorSistema:
                 case "Meu Cadastro": self.controlador_caminhoneiro.atualizar_caminhoneiro(self.sessao.usuario_atual.id)
 
                 # Botões Compartilhados
-                case "Notificações": pass
+                case "Notificações": self.__controlador_notificacoes.listar_notificacoes(self.sessao.usuario_atual)
                 case "Sair": return

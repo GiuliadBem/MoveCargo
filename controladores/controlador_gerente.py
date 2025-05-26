@@ -23,3 +23,13 @@ class ControladorGerente:
         gerente = self.gerente
         gerente.receber_notificacao(notificacao)
         self.__gerente_dao.update(gerente)
+
+    def marcar_notificacoes_como_lidas(self):
+        gerente = self.gerente
+
+        # Le notificações
+        for notificacao in gerente.notificacoes:
+            notificacao.ler()
+        
+        # Atualiza o usuário no DAO
+        self.__gerente_dao.update(gerente)

@@ -15,7 +15,7 @@ class TelaSistema:
             sg.Button('🔔', key='Notificações', button_color=('black', sg.theme_background_color())), 
             sg.Text(
                 str(notificacoes_nao_lidas) if notificacoes_nao_lidas > 0 else '',
-                size=(1, 1),
+                size=(2, 1),
                 font=('Helvetica', 10, 'bold'),
                 background_color='red' if notificacoes_nao_lidas > 0 else sg.theme_background_color(),
                 text_color='white',

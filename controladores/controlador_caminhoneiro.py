@@ -62,6 +62,17 @@ class ControladorCaminhoneiro:
 
         # Atualiza o usuário no DAO
         self.__caminhoneiro_dao.update(caminhoneiro)
+    
+    def marcar_notificacoes_como_lidas(self, id_caminhoneiro):
+        caminhoneiro = self.procura_caminhoneiro_por_id(id_caminhoneiro)
+
+        # Le notificações
+        for notificacao in caminhoneiro.notificacoes:
+            notificacao.ler()
+        
+        # Atualiza o usuário no DAO
+        self.__caminhoneiro_dao.update(caminhoneiro)
+        
 
     def atualizar_caminhoneiro(self, id_caminhoneiro):
         caminhoneiro = self.procura_caminhoneiro_por_id(id_caminhoneiro)

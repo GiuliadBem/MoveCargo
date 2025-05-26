@@ -28,6 +28,9 @@ class Pessoa(ABC):
     def receber_notificacao(self, notificacao: Notificacao):
         self.__notificacoes.append(notificacao)
     
+    def limpar_notificacoes(self):
+        self.__notificacoes = []
+    
     #---------------------------------------------------------------
     # Métodos
     #---------------------------------------------------------------
