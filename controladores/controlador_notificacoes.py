@@ -36,7 +36,7 @@ class ControladorNotificacoes:
 
                 # Falta menos de 1 hora para o prazo
                 tempo_restante = frete.prazo_entrega - datetime.now()
-                if timedelta(0) < tempo_restante <= timedelta(hours=1):
+                if timedelta(0) < tempo_restante <= timedelta(hours=1) and frete.status not in [Status.CONCLUIDO, Status.CANCELADO]:
                     notificacao = Notificacao(f"Falta menos de uma hora para o prazo de entrega para o frete do caminhoneiro {frete.caminhoneiro.nome} (ID: {frete.caminhoneiro.id}).")
                     ctrl_gerente.notifica_gerente(notificacao)
 
@@ -56,7 +56,7 @@ class ControladorNotificacoes:
 
                     # Falta menos de 1 hora para o prazo
                     tempo_restante = frete.prazo_entrega - datetime.now()
-                    if timedelta(0) < tempo_restante <= timedelta(hours=1):
+                    if timedelta(0) < tempo_restante <= timedelta(hours=1) and frete.status not in [Status.CONCLUIDO, Status.CANCELADO]:
                         notificacao = Notificacao("Falta menos de uma hora para o prazo de entrega do seu frete.")
                         ctrl_caminhoneiro.notifica_caminhoneiro(frete.caminhoneiro.id, notificacao)
 
