@@ -8,6 +8,14 @@ class TelaCadastroFrete:
         sg.theme("Reddit")
         self.__window = None  # Armazena a própria janela de cadastro de frete
 
+    def __verificar_motivo_cancelamento(self, valores: dict) -> bool:
+        """Verifica se o motivo do cancelamento foi informado quando necessário."""
+        return not (valores["status"] == "CANCELADO" and not valores.get("motivo_cancelamento"))
+
+    def __mostrar_erro_motivo_cancelamento(self):
+        """Exibe mensagem de erro quando o motivo do cancelamento não foi informado."""
+        sg.popup("É necessário informar o motivo do cancelamento!", title="Campo obrigatório")
+
     def pega_dados_frete(self, lista_caminhoneiros, lista_caminhoes, frete=None, modo_atualizacao_status=False):
         observacoes_adicionadas = []
         
@@ -164,8 +172,10 @@ class TelaCadastroFrete:
                         return valores
                 else:
                     # No modo de atualização de status, valida o motivo do cancelamento se necessário
-                    if valores["status"] == "CANCELADO" and not valores.get("motivo_cancelamento"):
-                        sg.popup("É necessário informar o motivo do cancelamento!", title="Campo obrigatório")
+                    motivo = self.__verificar_motivo_cancelamento(valores)
+                    
+                    if not motivo:
+                        self.__mostrar_erro_motivo_cancelamento()
                         continue
                     
                     # Se passou pela validação, retorna os valores

@@ -248,38 +248,31 @@ class ControladorFrete:
 
     def atualizar_status_frete_gerente(self, id_frete):
         frete = self.procura_frete_por_id(id_frete)
-
         if not frete:
             self.__tela_frete.mostrar_mensagem("Frete não encontrado.")
             return
 
-        # Verificar se o prazo expirou
-        if not frete.prazo_entrega or datetime.now() <= frete.prazo_entrega:
-            self.__tela_frete.mostrar_mensagem("O prazo de entrega ainda não expirou. Apenas o caminhoneiro pode atualizar o status.")
-            return
-
-        # Verificar se o status já está finalizado
-        if frete.status in [Status.CONCLUIDO, Status.CANCELADO]:
-            self.__tela_frete.mostrar_mensagem("Este frete já está finalizado e não pode ser alterado.")
-            return
-
-        # Obter os novos dados usando a tela de cadastro em modo de atualização de status
-        dados = self.__tela_cadastro_frete.pega_dados_frete(
+        dados_frete = self.__tela_cadastro_frete.pega_dados_frete(
             self.__controlador_sistema.controlador_caminhoneiro.lista_caminhoneiros,
             self.__controlador_sistema.controlador_caminhao.lista_caminhoes,
             frete,
             modo_atualizacao_status=True
         )
-
-        if dados is None:
-            self.__tela_frete.mostrar_mensagem("Atualização cancelada.")
+        if not dados_frete:
             return
 
-        # Atualizar o status e motivo do cancelamento
-        frete.status = Status[dados["status"]]
-        frete.motivo_cancelamento = MotivoCancelamento[dados["motivo_cancelamento"]] if dados["status"] == "CANCELADO" else None
+        # Atualizar status
+        frete.status = Status[dados_frete["status"]]
+        
+        # Se o status for CANCELADO, salvar o motivo
+        if frete.status == Status.CANCELADO:
+            frete.motivo_cancelamento = dados_frete["motivo_cancelamento"]
+
+        # Salvar as alterações no arquivo
         self.__frete_dao.update(frete)
+        
         self.__tela_frete.mostrar_mensagem("Status atualizado com sucesso!")
+        return frete
 
     def listar_meus_fretes(self, id_caminhoneiro):
         dados_exibicao = []
