@@ -4,6 +4,7 @@ from controladores.controlador_caminhoneiro import ControladorCaminhoneiro
 from controladores.controlador_frete import ControladorFrete
 from controladores.controlador_gerente import ControladorGerente
 from controladores.controlador_login import ControladorLogin
+from controladores.controlador_notificacoes import ControladorNotificacoes
 from modelos.sessao import Sessao
 
 
@@ -15,6 +16,7 @@ class ControladorSistema:
         self.__controlador_frete = ControladorFrete(self)
         self.__controlador_gerente = ControladorGerente(self)
         self.__controlador_login = ControladorLogin(self)
+        self.__controlador_notificacoes = ControladorNotificacoes(self)
         self.__sessao = Sessao()
 
     #---------------------------------------------------------------
@@ -62,10 +64,13 @@ class ControladorSistema:
 
                 # Sair do programa
                 case "Sair": return
+
+        # Contagem de novas notificações
+        self.__controlador_notificacoes.listar_novas_notificacoes(self.sessao.usuario_atual)
         
         # Fluxo do programa
         while True:
-            botao = self.__tela_sistema.mostra_tela(self.sessao.usuario_atual.usuario) # type: ignore
+            botao = self.__tela_sistema.mostra_tela(self.sessao.usuario_atual.usuario, 0) # type: ignore
             match botao:
                 # Botões Gerente
                 case "Fretes": self.controlador_frete.opcoes_frete("Gerente")
@@ -78,5 +83,6 @@ class ControladorSistema:
                 case "Meus Fretes": self.controlador_frete.opcoes_meus_fretes(self.sessao.usuario_atual.id)
                 case "Meu Cadastro": self.controlador_caminhoneiro.atualizar_caminhoneiro(self.sessao.usuario_atual.id)
 
-                # Sair do programa
+                # Botões Compartilhados
+                case "Notificações": pass
                 case "Sair": return

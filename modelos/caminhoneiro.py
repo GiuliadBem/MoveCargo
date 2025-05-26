@@ -17,7 +17,6 @@ class Caminhoneiro(Pessoa):
         self.__possui_MOPP = possui_MOPP
         self.__data_nascimento = data_nascimento
         self.__freteAtual = None
-        self.__notificacoes = []
 
 
     # Getters e Setters

@@ -1,10 +1,13 @@
 from abc import ABC
 import hashlib
 
+from modelos.notificacao import Notificacao
+
 class Pessoa(ABC):
     def __init__(self, usuario: str, senha: str):
         self.__usuario = usuario.lower()
         self.__senha = self.__hash_senha(senha)
+        self.__notificacoes: list[Notificacao] = []
     
     #---------------------------------------------------------------
     # Getters
@@ -17,6 +20,13 @@ class Pessoa(ABC):
     @property
     def senha(self):
         return self.__senha
+    
+    @property
+    def notificacoes(self):
+        return self.__notificacoes
+    
+    def receber_notificacao(self, notificacao: Notificacao):
+        self.__notificacoes.append(notificacao)
     
     #---------------------------------------------------------------
     # Métodos

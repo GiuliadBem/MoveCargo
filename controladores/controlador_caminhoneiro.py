@@ -1,3 +1,4 @@
+from modelos.notificacao import Notificacao
 from telas.tela_cadastro_caminhoneiro import TelaCadastroCaminhoneiro
 from telas.tela_caminhoneiro import TelaCaminhoneiro
 from modelos.caminhoneiro import Caminhoneiro
@@ -52,6 +53,15 @@ class ControladorCaminhoneiro:
 
         except (KeyError, ValueError) as erro:
             self.__tela_caminhoneiro.mostrar_mensagem(f"Erro ao cadastrar caminhoneiro: {erro}")
+
+    def notifica_caminhoneiro(self, id_caminhoneiro, notificacao: Notificacao):
+        caminhoneiro = self.procura_caminhoneiro_por_id(id_caminhoneiro)
+
+        # Envia notificação
+        caminhoneiro.receber_notificacao(notificacao)
+
+        # Atualiza o usuário no DAO
+        self.__caminhoneiro_dao.update(caminhoneiro)
 
     def atualizar_caminhoneiro(self, id_caminhoneiro):
         caminhoneiro = self.procura_caminhoneiro_por_id(id_caminhoneiro)
