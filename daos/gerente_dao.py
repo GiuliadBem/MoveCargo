@@ -4,7 +4,9 @@ from modelos.gerente import Gerente
 class GerenteDAO(DAO):
     def __init__(self):
         super().__init__("gerente.pkl")
-        if not "gerente" in super().get_all():
+        try: 
+            super().get("gerente")
+        except:
             super().add("gerente", Gerente())
 
     def update(self, gerente: Gerente):
