@@ -5,6 +5,7 @@ from controladores.controlador_frete import ControladorFrete
 from controladores.controlador_gerente import ControladorGerente
 from controladores.controlador_login import ControladorLogin
 from controladores.controlador_notificacoes import ControladorNotificacoes
+from controladores.controlador_carga import ControladorCarga
 from modelos.sessao import Sessao
 
 
@@ -17,6 +18,7 @@ class ControladorSistema:
         self.__controlador_gerente = ControladorGerente(self)
         self.__controlador_login = ControladorLogin(self)
         self.__controlador_notificacoes = ControladorNotificacoes(self)
+        self.__controlador_carga = ControladorCarga(self)
         self.__sessao = Sessao()
 
     #---------------------------------------------------------------
@@ -46,6 +48,10 @@ class ControladorSistema:
     @property
     def sessao(self):
         return self.__sessao
+    
+    @property
+    def controlador_carga(self):
+        return self.__controlador_carga
     
     #---------------------------------------------------------------
     # Inicialização do Sistema
@@ -87,3 +93,6 @@ class ControladorSistema:
                 # Botões Compartilhados
                 case "Notificações": self.__controlador_notificacoes.listar_notificacoes(self.sessao.usuario_atual)
                 case "Sair": return
+
+    def abre_tela_cargas(self):
+        self.__controlador_carga.opcoes_carga()

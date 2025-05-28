@@ -11,7 +11,7 @@ class ControladorFrete:
     def __init__(self, controlador_sistema):
         self.__frete_dao = FreteDAO()
         self.__tela_frete = TelaFrete()
-        self.__tela_cadastro_frete = TelaCadastroFrete()
+        self.__tela_cadastro_frete = TelaCadastroFrete(self)
         self.__tela_atualizacao_status = TelaAtualizacaoStatus()
         self.__controlador_sistema = controlador_sistema
 
@@ -70,9 +70,7 @@ class ControladorFrete:
                 caminhoneiro=caminhoneiro,
                 caminhao=caminhao,
                 carga=carga,
-                # -- Atualizar Status Frete ----------------------------------------------------------------------------------------------------------------------------------------------- #
                 prazo_entrega=dados["prazo_entrega"]
-                # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
             )
 
             self.__frete_dao.add(novo_frete)
@@ -361,3 +359,23 @@ class ControladorFrete:
                 id_frete = opcao["id"]
                 self.atualizar_status_frete(id_frete)
     # ------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
+
+    def obter_lista_cargas(self):
+        """Retorna a lista de todas as cargas disponíveis"""
+        return self.__controlador_sistema.controlador_carga.lista_cargas
+
+    def abrir_cadastro_carga(self):
+        """Abre a tela de cadastro de carga e retorna a carga cadastrada"""
+        # Abre a tela de cadastro de carga
+        self.__controlador_sistema.controlador_carga.incluir_carga()
+        
+        # Retorna a última carga cadastrada (se houver)
+        cargas = self.__controlador_sistema.controlador_carga.lista_cargas
+        if cargas:
+            # Retorna a última carga cadastrada
+            ultima_carga = cargas[-1]
+            # Atualiza o display da carga na tela
+            if self.__tela_cadastro_frete:
+                self.__tela_cadastro_frete.atualizar_display_carga(ultima_carga)
+            return ultima_carga
+        return None
