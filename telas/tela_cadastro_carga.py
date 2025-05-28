@@ -1,10 +1,25 @@
 # telas/tela_cadastro_carga.py
 import FreeSimpleGUI as sg
 from enums.tipo_carga import TipoCarga
+from modelos.carga import Carga
 
 class TelaCadastroCarga:
     def __init__(self):
         self.__window = None
+
+    def mostrar_mensagem(self, mensagem: str, tipo: str = "info"):
+        """Mostra uma mensagem ao usuário.
+        
+        Args:
+            mensagem (str): A mensagem a ser exibida
+            tipo (str): O tipo da mensagem ('info', 'erro', 'sucesso')
+        """
+        if tipo == "erro":
+            sg.popup_error(mensagem)
+        elif tipo == "sucesso":
+            sg.popup_ok(mensagem, title="Sucesso")
+        else:
+            sg.popup_ok(mensagem, title="Informação")
 
     def pega_dados_carga(self):
         # Lista de tipos de carga para o combo
@@ -15,9 +30,8 @@ class TelaCadastroCarga:
             [sg.Text('_' * 50)],
             [sg.Text('Código*:', size=(12, 1)), sg.Input(key='-CODIGO-', size=(30, 1))],
             [sg.Text('Descrição*:', size=(12, 1)), sg.Input(key='-DESCRICAO-', size=(30, 1))],
-            [sg.Text('Peso*:', size=(12, 1)), sg.Input(key='-PESO-', size=(15, 1))],
-            [sg.Text('Tipo de Carga*:', size=(12, 1)), sg.Combo(tipos_carga, key='-TIPO-', size=(20, 1), readonly=True, enable_events=True)],
-            [sg.Text('Unidade:', size=(12, 1)), sg.Text('kg', key='-UNIDADE-', size=(5, 1))],
+            [sg.Text('Quantidade*:', size=(12, 1)), sg.Input(key='-PESO-', size=(15, 1))],
+            [sg.Text('Tipo de Carga*:', size=(12, 1)), sg.Combo(tipos_carga, key='-TIPO-', size=(20, 1), readonly=True)],
             [sg.Checkbox('Carga Perigosa', key='-CARGA_PERIGOSA-')],
             [sg.Text('* Campos obrigatórios', text_color='red')],
             [sg.Text('_' * 50)],
@@ -33,42 +47,36 @@ class TelaCadastroCarga:
                 self.__window.close()
                 return None
 
-            if event == '-TIPO-':
-                # Atualiza a unidade baseado no tipo de carga
-                tipo_selecionado = values['-TIPO-']
-                unidade = "kg" if tipo_selecionado in ["SOLIDA", "VIVA"] else "L"
-                self.__window['-UNIDADE-'].update(unidade)
-
             if event == 'Confirmar':
                 # Validação dos campos
                 if not values['-CODIGO-'].strip():
-                    sg.popup_error('Erro: Código é obrigatório!')
+                    self.mostrar_mensagem('Erro: Código é obrigatório!', tipo="erro")
                     continue
 
                 if not values['-DESCRICAO-'].strip():
-                    sg.popup_error('Erro: Descrição é obrigatória!')
+                    self.mostrar_mensagem('Erro: Descrição é obrigatória!', tipo="erro")
                     continue
 
                 if not values['-TIPO-']:
-                    sg.popup_error('Erro: Selecione um tipo de carga!')
+                    self.mostrar_mensagem('Erro: Selecione um tipo de carga!', tipo="erro")
                     continue
 
                 try:
-                    peso = float(values['-PESO-'])
-                    if peso <= 0:
-                        sg.popup_error('Erro: Peso deve ser maior que zero!')
+                    quantidade = float(values['-PESO-'])
+                    if quantidade <= 0:
+                        self.mostrar_mensagem('Erro: Quantidade deve ser maior que zero!', tipo="erro")
                         continue
                 except ValueError:
-                    sg.popup_error('Erro: Peso deve ser um número válido!')
+                    self.mostrar_mensagem('Erro: Quantidade deve ser um número válido!', tipo="erro")
                     continue
 
                 # Se chegou até aqui, todos os dados são válidos
                 dados = {
                     "codigo": values['-CODIGO-'].strip().upper(),
                     "descricao": values['-DESCRICAO-'].strip(),
-                    "peso": peso,
+                    "peso": quantidade,
                     "tipo": TipoCarga[values['-TIPO-']],
-                    "carga_perigosa": values['-CARGA_PERIGOSA-']
+                    "carga_perigosa": values.get('-CARGA_PERIGOSA-', False)
                 }
 
                 self.__window.close()
@@ -84,15 +92,12 @@ class TelaCadastroCarga:
              sg.Input(default_text=dados_atuais['codigo'], key='-CODIGO-', size=(30, 1))],
             [sg.Text('Descrição*:', size=(12, 1)), 
              sg.Input(default_text=dados_atuais['descricao'], key='-DESCRICAO-', size=(30, 1))],
-            [sg.Text('Peso*:', size=(12, 1)), 
+            [sg.Text('Quantidade*:', size=(12, 1)), 
              sg.Input(default_text=str(dados_atuais['peso']), key='-PESO-', size=(15, 1))],
             [sg.Text('Tipo de Carga*:', size=(12, 1)), 
              sg.Combo(tipos_carga, 
                      default_value=dados_atuais['tipo'].name if hasattr(dados_atuais['tipo'], 'name') else str(dados_atuais['tipo']),
-                     key='-TIPO-', size=(20, 1), readonly=True, enable_events=True)],
-            [sg.Text('Unidade:', size=(12, 1)), 
-             sg.Text('kg' if dados_atuais['tipo'].name in ["SOLIDA", "VIVA"] else "L", 
-                    key='-UNIDADE-', size=(5, 1))],
+                     key='-TIPO-', size=(20, 1), readonly=True)],
             [sg.Checkbox('Carga Perigosa', default=dados_atuais['carga_perigosa'], key='-CARGA_PERIGOSA-')],
             [sg.Text('* Campos obrigatórios', text_color='red')],
             [sg.Text('_' * 50)],
@@ -108,42 +113,39 @@ class TelaCadastroCarga:
                 self.__window.close()
                 return None
 
-            if event == '-TIPO-':
-                # Atualiza a unidade baseado no tipo de carga
-                tipo_selecionado = values['-TIPO-']
-                unidade = "kg" if tipo_selecionado in ["SOLIDA", "VIVA"] else "L"
-                self.__window['-UNIDADE-'].update(unidade)
-
             if event == 'Confirmar':
                 # Validação dos campos
                 if not values['-CODIGO-'].strip():
-                    sg.popup_error('Erro: Código é obrigatório!')
+                    self.mostrar_mensagem('Erro: Código é obrigatório!', tipo="erro")
                     continue
 
                 if not values['-DESCRICAO-'].strip():
-                    sg.popup_error('Erro: Descrição é obrigatória!')
+                    self.mostrar_mensagem('Erro: Descrição é obrigatória!', tipo="erro")
                     continue
 
                 if not values['-TIPO-']:
-                    sg.popup_error('Erro: Selecione um tipo de carga!')
+                    self.mostrar_mensagem('Erro: Selecione um tipo de carga!', tipo="erro")
                     continue
 
                 try:
-                    peso = float(values['-PESO-'])
-                    if peso <= 0:
-                        sg.popup_error('Erro: Peso deve ser maior que zero!')
+                    quantidade = float(values['-PESO-'])
+                    if quantidade <= 0:
+                        self.mostrar_mensagem('Erro: Quantidade deve ser maior que zero!', tipo="erro")
                         continue
                 except ValueError:
-                    sg.popup_error('Erro: Peso deve ser um número válido!')
+                    self.mostrar_mensagem('Erro: Quantidade deve ser um número válido!', tipo="erro")
                     continue
 
                 dados = {
                     "codigo": values['-CODIGO-'].strip().upper(),
                     "descricao": values['-DESCRICAO-'].strip(),
-                    "peso": peso,
+                    "peso": quantidade,
                     "tipo": TipoCarga[values['-TIPO-']],
-                    "carga_perigosa": values['-CARGA_PERIGOSA-']
+                    "carga_perigosa": values.get('-CARGA_PERIGOSA-', False)
                 }
 
                 self.__window.close()
                 return dados
+
+    def procura_carga_por_codigo(self, codigo: str):
+        return self.__carga_dao.get(codigo.upper())

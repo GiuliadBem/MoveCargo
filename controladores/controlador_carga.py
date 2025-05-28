@@ -3,6 +3,7 @@ from telas.tela_carga import TelaCarga
 from telas.tela_cadastro_carga import TelaCadastroCarga
 from modelos.carga import Carga
 from daos.carga_dao import CargaDAO
+from enums.tipo_carga import TipoCarga
 
 class ControladorCarga:
     def __init__(self, controlador_sistema):
@@ -19,34 +20,37 @@ class ControladorCarga:
         return self.__carga_dao.get(codigo)
 
     def incluir_carga(self):
-        dados = self.__tela_cadastro_carga.pega_dados_carga()
-        
-        if dados is None:
-            self.__tela_carga.mostrar_mensagem("Cadastro cancelado.")
-            return
-
+        """Inclui uma nova carga no sistema."""
         try:
-            # Verifica se já existe uma carga com o mesmo código
-            if self.procura_carga_por_codigo(dados["codigo"]):
-                self.__tela_carga.mostrar_mensagem("Erro: Já existe uma carga com este código.")
+            dados = self.__tela_cadastro_carga.pega_dados_carga()
+            if not dados:
                 return
-
-            nova_carga = Carga(
-                codigo=dados["codigo"],
-                tipo=dados["tipo"],
-                descricao=dados["descricao"],
-                peso_volume=dados["peso"],
-                unidade="kg" if dados["tipo"].name in ["SOLIDA", "VIVA"] else "L",
-                perigosa=dados["carga_perigosa"]
+            
+            # Verifica se já existe uma carga com o mesmo código
+            if self.__carga_dao.get(dados['codigo']):
+                self.__tela_cadastro_carga.mostrar_mensagem("Já existe uma carga cadastrada com este código.", tipo="erro")
+                return
+            
+            # Cria uma nova carga com os dados fornecidos
+            carga = Carga(
+                codigo=dados['codigo'],
+                tipo=dados['tipo'],
+                descricao=dados['descricao'],
+                quantidade=dados['peso'],  # Usando o peso como quantidade
+                carga_perigosa=dados['carga_perigosa']
             )
-
-            self.__carga_dao.add(nova_carga)
-            self.__tela_carga.mostrar_mensagem("Carga cadastrada com sucesso!")
-            return nova_carga
-
-        except (KeyError, ValueError, TypeError) as erro:
-            self.__tela_carga.mostrar_mensagem(f"Erro ao cadastrar carga: {erro}")
-            return None
+            
+            # Salva a carga no DAO
+            try:
+                self.__carga_dao.add(carga)
+                self.__tela_cadastro_carga.mostrar_mensagem("Carga cadastrada com sucesso!", tipo="sucesso")
+            except Exception as e:
+                self.__tela_cadastro_carga.mostrar_mensagem(f"Erro ao salvar a carga: {str(e)}", tipo="erro")
+                
+        except (ValueError, TypeError) as e:
+            self.__tela_cadastro_carga.mostrar_mensagem(f"Erro ao cadastrar carga: {str(e)}", tipo="erro")
+        except Exception as e:
+            self.__tela_cadastro_carga.mostrar_mensagem(f"Erro inesperado ao cadastrar carga: {str(e)}", tipo="erro")
 
     def atualizar_carga(self, codigo: str):
         carga = self.procura_carga_por_codigo(codigo)
@@ -58,9 +62,9 @@ class ControladorCarga:
         dados_atuais = {
             "codigo": carga.codigo,
             "descricao": carga.descricao,
-            "peso": carga.peso_volume,
+            "peso": carga.quantidade,
             "tipo": carga.tipo,
-            "carga_perigosa": carga.perigosa
+            "carga_perigosa": carga.carga_perigosa
         }
 
         novos_dados = self.__tela_cadastro_carga.pega_dados_atualizacao(dados_atuais)
@@ -83,10 +87,9 @@ class ControladorCarga:
 
             carga.codigo = novos_dados["codigo"]
             carga.descricao = novos_dados["descricao"]
-            carga.peso_volume = novos_dados["peso"]
+            carga.quantidade = novos_dados["peso"]
             carga.tipo = novos_dados["tipo"]
-            carga.perigosa = novos_dados["carga_perigosa"]
-            carga.unidade = "kg" if novos_dados["tipo"].name in ["SOLIDA", "VIVA"] else "L"
+            carga.carga_perigosa = novos_dados["carga_perigosa"]
 
             self.__carga_dao.update(carga)
             self.__tela_carga.mostrar_mensagem("Carga atualizada com sucesso!")
@@ -113,10 +116,9 @@ class ControladorCarga:
             dados_exibicao.append({
                 "codigo": carga.codigo,
                 "descricao": carga.descricao,
-                "peso": carga.peso_volume,
+                "peso": carga.quantidade,
                 "tipo": carga.tipo.name if hasattr(carga.tipo, 'name') else str(carga.tipo),
-                "carga_perigosa": "Sim" if carga.perigosa else "Não",
-                "unidade": carga.unidade
+                "carga_perigosa": "Sim" if carga.carga_perigosa else "Não"
             })
         return dados_exibicao
 

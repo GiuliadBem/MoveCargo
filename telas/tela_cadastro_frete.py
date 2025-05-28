@@ -2,6 +2,7 @@ import FreeSimpleGUI as sg
 from enums.status import Status
 from enums.motivo_cancelamento import MotivoCancelamento
 from datetime import datetime
+from enums.tipo_carga import TipoCarga
 
 class TelaCadastroFrete:
     def __init__(self, controlador_frete=None):
@@ -36,11 +37,9 @@ class TelaCadastroFrete:
             "status": frete.status.name if frete else status_opcoes[0],
             "caminhoneiro": f"{frete.caminhoneiro.id} - {frete.caminhoneiro.nome}" if frete else '',
             "caminhao": f"{frete.caminhao.id} - {frete.caminhao.modelo} ({frete.caminhao.placa})" if frete else '',
-            "carga": "frete.carga.codigo",  # Pode ser um ID
+            "carga": frete.carga.codigo if frete and frete.carga else None,
             "motivo_cancelamento": frete.motivo_cancelamento.name if frete and frete.motivo_cancelamento else "",
-            # -- Atualizar Status Frete --------------------------------------------------------------------------- #
             "prazo_entrega": frete.prazo_entrega.strftime("%d/%m/%Y %H:%M") if frete and frete.prazo_entrega else ""
-            # ----------------------------------------------------------------------------------------------------- #
         }
         
         if frete:
@@ -69,11 +68,11 @@ class TelaCadastroFrete:
                          disabled=modo_atualizacao_status)],
             
             [sg.Text("Carga:", size=(20, 1)),
-             sg.Multiline(default_text=valores_padrao["carga"], size=(25, 4), 
+             sg.Multiline(default_text=valores_padrao["carga"], size=(40, 4), 
                          text_color="gray" if modo_atualizacao_status else None,
                          disabled=True, key="carga_display"),
              sg.Button("ADICIONAR CARGA", key="add_carga", size=(15, 1), disabled=modo_atualizacao_status)],
-
+            
             [sg.Text("Distância (km):", size=(20, 1)), 
              sg.InputText(key="distancia", default_text=str(valores_padrao["distancia"]), 
                          text_color="gray" if modo_atualizacao_status else None,
@@ -100,7 +99,7 @@ class TelaCadastroFrete:
                      key="caminhao", size=(30, 1), 
                      text_color="gray" if modo_atualizacao_status else None,
                      disabled=modo_atualizacao_status)],
-            # -- Atualizar Status Frete ------------------------------------------------------------------------------------------- #
+            
             [sg.Text("Prazo de Entrega:", size=(20, 1)),
              sg.InputText(key="prazo_entrega", default_text=valores_padrao["prazo_entrega"].split(" ")[0] if valores_padrao["prazo_entrega"] else "",
                          text_color="gray" if modo_atualizacao_status else None,
@@ -111,7 +110,7 @@ class TelaCadastroFrete:
                          text_color="gray" if modo_atualizacao_status else None,
                          disabled=modo_atualizacao_status, size=(8, 1)),
              sg.Text("(HH:MM)", size=(8, 1), text_color="gray")],
-            # --------------------------------------------------------------------------------------------------------------------- #
+            
             [sg.Text("Observações:", size=(20, 1)),
              sg.Multiline("\n".join(observacoes_adicionadas), size=(25, 4), 
                          text_color="gray" if modo_atualizacao_status else None,
@@ -146,7 +145,7 @@ class TelaCadastroFrete:
                     self.__window["motivo_label"].update(visible=False)
                     self.__window["motivo_cancelamento"].update(visible=False, value="", 
                                                               text_color="gray" if modo_atualizacao_status else None)
-           
+            
             elif evento in ("Cadastrar", "Atualizar", "Atualizar Status"):
                 # Valida campos obrigatórios apenas se não estiver no modo de atualização de status
                 if not modo_atualizacao_status:
@@ -160,7 +159,7 @@ class TelaCadastroFrete:
                         # Se passou por todos os campos: retorna
                         valores["caminhoneiro"] = caminhoneiro_map.get(valores["caminhoneiro"])
                         valores["caminhao"] = caminhao_map.get(valores["caminhao"])
-                        # -- Atualizar Status Frete --------------------------------------------------------------------------- #
+                        
                         # Converte a string da data e hora para objeto datetime
                         try:
                             data_hora = f"{valores['prazo_entrega']} {valores['hora_entrega']}"
@@ -168,7 +167,7 @@ class TelaCadastroFrete:
                         except ValueError:
                             sg.popup("Formato de data/hora inválido. Use o formato dd/mm/aaaa HH:MM.", title="Erro")
                             continue
-                        # ----------------------------------------------------------------------------------------------------- #
+                        
                         self.__window.close()
                         return valores
                 else:
@@ -187,12 +186,6 @@ class TelaCadastroFrete:
             
             elif evento == "add_observacao":
                 sg.popup("Implementação depois")
-                #nova_obs = sg.popup_get_text("Digite a nova observação:")
-                #if nova_obs:
-                    #from datetime import datetime
-                    #texto_formatado = f"{nova_obs} - {datetime.now().strftime('%H:%M - %d/%m/%Y')}"
-                    #self.__observacoes_adicionadas.append(texto_formatado)
-                    #self.__window["observacoes_display"].update("\n".join(self.__observacoes_adicionadas))
             
             elif evento == "add_carga":
                 if self.__controlador_frete:
@@ -202,14 +195,21 @@ class TelaCadastroFrete:
                         self.__window["carga_display"].update(self.formatar_resumo_carga(carga))
                 else:
                     sg.popup_error("Erro: Controlador de frete não inicializado")
-            
+
     def formatar_resumo_carga(self, carga):
         if not carga:
             return "Nenhuma carga definida."
-        return (f"Tipo: {carga.tipo.name}\n"
-                f"Quantidade: {carga.quantidade}\n"
-                f"Descrição: {carga.descricao}\n"
-                f"Perigosa: {'Sim' if carga.carga_perigosa else 'Não'}")
+        if(carga.tipo == TipoCarga.LIQUIDA):
+            unidade_medida = "L"
+        elif(carga.tipo == TipoCarga.SOLIDA):
+            unidade_medida = "Kg"
+        elif(carga.tipo == TipoCarga.GASOSA):
+            unidade_medida = "M3"
+        elif(carga.tipo == TipoCarga.VIVA):
+            unidade_medida = "Un"
+        else:
+            unidade_medida = ""
+        return (f"{carga.codigo} - {carga.tipo} ({carga.quantidade} {unidade_medida})")
 
     def fechar(self):
         if self.__window:

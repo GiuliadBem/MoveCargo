@@ -26,7 +26,10 @@ class DAO:
             self.__dump() # Atualiza o arquivo
 
     def get(self, chave):
-        return self.__dados[chave]
+        try:
+            return self.__dados[chave]
+        except KeyError:
+            return None
 
     def remove(self, chave):
         self.__dados.pop(chave)
