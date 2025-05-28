@@ -33,7 +33,7 @@ class ControladorFrete:
         lista_caminhoneiros_livres = self.lista_caminhoneiros_livres(lista_caminhoneiros)
         
         dados = self.__tela_cadastro_frete.pega_dados_frete(lista_caminhoneiros_livres, lista_caminhoes_livres)
-        
+
         if dados == None:
             self.__tela_frete.mostrar_mensagem("Cadastro cancelado.")
             return
@@ -43,21 +43,26 @@ class ControladorFrete:
             while self.procura_frete_por_id(cria_id) is not None:
                 cria_id += 1
 
-            # Temporariamente, vamos usar uma carga vazia e sem observacoes
-            carga = None  #carga = dados["carga"]
+            carga = dados["carga"]
             observacoes = ""  # [Observacao(**obs) for obs in dados.get("observacoes", [])] 
             caminhao = dados["caminhao"]
             caminhoneiro = dados["caminhoneiro"]
 
-            #vef_carga = self.verifica_tipo_carga(carga, caminhao)
-            #if not vef_carga:
-             #   self.__tela_frete.mostrar_mensagem("Erro: Caminhão incompatível com o tipo de carga.")
-             #   return
+            vef_carga = self.verifica_tipo_carga(carga, caminhao)
+            print(vef_carga)
+            vef_capacidade = self.verifica_capacidade(carga, caminhao)
+            print(vef_capacidade)
+            if not vef_carga:
+                self.__tela_frete.mostrar_mensagem("Caminhão incompatível com o tipo de carga.")
+                return
+            elif not vef_capacidade:
+                self.__tela_frete.mostrar_mensagem("Carga maior que capacidade do Caminhão")
+                return
             
-           # vef_mopp = self.verifica_Mopp(carga, caminhoneiro)
-            #if not vef_mopp:
-              #  self.__tela_frete.mostrar_mensagem("Caminhoneiro não possui licença MOPP para carga perigosa.")
-            #    return
+            vef_mopp = self.verifica_Mopp(carga, caminhoneiro)
+            if not vef_mopp:
+                self.__tela_frete.mostrar_mensagem("Caminhoneiro não possui licença MOPP para carga perigosa.")
+                return
 
             novo_frete = Frete(
                 id=cria_id,
@@ -106,26 +111,26 @@ class ControladorFrete:
             caminhoneiro = novos_dados["caminhoneiro"]
 
 
-            #vef_carga = self.verifica_tipo_carga(carga, caminhao)
-            #vef_capacidade = self.verifica_capacidade(carga, caminhao)
-            #if not vef_carga:
-            #    self.__tela_frete.mostrar_mensagem("Caminhão incompatível com o tipo de carga.")
-            #    return
-            #elif not vef_capacidade:
-            #    self.__tela_frete.mostrar_mensagem("Carga maior que capacidade do Caminhão")
-            #    return
+            vef_carga = self.verifica_tipo_carga(carga, caminhao)
+            vef_capacidade = self.verifica_capacidade(carga, caminhao)
+            if not vef_carga:
+                self.__tela_frete.mostrar_mensagem("Caminhão incompatível com o tipo de carga.")
+                return
+            elif not vef_capacidade:
+                self.__tela_frete.mostrar_mensagem("Carga maior que capacidade do Caminhão")
+                return
             
-           # vef_mopp = self.verifica_Mopp(carga, caminhoneiro)
-            #if not vef_mopp:
-            #    self.__tela_frete.mostrar_mensagem("Caminhoneiro não possui licença MOPP para carga perigosa.")
-            #    return
+            vef_mopp = self.verifica_Mopp(carga, caminhoneiro)
+            if not vef_mopp:
+                self.__tela_frete.mostrar_mensagem("Caminhoneiro não possui licença MOPP para carga perigosa.")
+                return
 
             frete.origem = novos_dados.get("origem", frete.origem)
             frete.destino = novos_dados.get("destino", frete.destino)
             frete.distancia = novos_dados.get("distancia", frete.distancia)
             frete.prazo_entrega = novos_dados.get("prazo_entrega", frete.distancia)
-            frete.caminhoneiro = caminhoneiro
-            frete.caminhao = caminhao
+            frete.caminhoneiro = novos_dados.get("caminhoneiro", frete.caminhoneiro)
+            frete.caminhao = novos_dados.get("caminhao", frete.caminhao)
             frete.carga = carga
             frete.observacoes = observacoes
                
@@ -159,7 +164,7 @@ class ControladorFrete:
         for frete in self.lista_fretes:
             dados_exibicao.append({
                 "id": frete.id,
-                #"carga": frete.carga.tipo.name,
+                #"carga": frete.carga.tipo,
                 "caminhoneiro": frete.caminhoneiro.nome,
                 "status": frete.status.name,
                 "prazo_entrega": frete.prazo_entrega
@@ -168,23 +173,29 @@ class ControladorFrete:
     
     # Validação de compatibilidade caminhão/carga
     def verifica_tipo_carga(self, carga, caminhao):
-        tipo_carga = carga.tipo_carga
+        tipo_carga = carga.tipo
         tipo_carga_caminhao = caminhao.tipo_carga
         
         if tipo_carga != tipo_carga_caminhao:
             return False
+        else:
+            return True
         
     # Validação de carga perigosa
     def verifica_Mopp(self, carga, caminhoneiro):
         caminhoneiro_mopp = caminhoneiro.possui_MOPP
         
-        if carga.perigosa and not caminhoneiro_mopp: #Verificar qual será o metodo 
+        if carga.carga_perigosa and not caminhoneiro_mopp:
             return False
+        else:
+            return True
     
     #Validação da capacidade
     def verifica_capacidade(self, carga, caminhao):
         if carga.quantidade > caminhao.capacidade:
             return False
+        else:
+            return True
     
     def lista_caminhoneiros_livres(self, lista_caminhoneiro):
         lista_caminhoneiros_livres = []

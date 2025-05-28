@@ -2,14 +2,12 @@ import FreeSimpleGUI as sg
 from enums.status import Status
 from enums.motivo_cancelamento import MotivoCancelamento
 from datetime import datetime
-#from controladores.controlador_carga import ControladorCarga --> isso aqui esta errado em um nivel
 from enums.tipo_carga import TipoCarga
 
 class TelaCadastroFrete:
     def __init__(self, controlador_frete=None):
         sg.theme("Reddit")
         self.__window = None  # Armazena a própria janela de cadastro de frete
-        # self.__controlador_carga = ControladorCarga(self)
         self.__controlador_frete = controlador_frete  # Referência ao controlador de frete
 
     def __verificar_motivo_cancelamento(self, valores: dict) -> bool:
@@ -251,19 +249,30 @@ class TelaCadastroFrete:
             
             elif evento in ("Cadastrar", "Atualizar", "Atualizar Status"):
                 # Valida campos obrigatórios apenas se não estiver no modo de atualização de status
+                valores["carga"] = self.__carga_atual
                 if not modo_atualizacao_status:
-                    campos_obrigatorios = ["origem", "destino", "distancia", "status", "caminhoneiro", "caminhao", "prazo_entrega", "hora_entrega"] #COLOCAR CARGA POSTERIORMENTE
+                    campos_obrigatorios = ["origem", "destino", "distancia", "status", "caminhoneiro","caminhao","prazo_entrega", "hora_entrega"] 
 
                     for campo in campos_obrigatorios:
+                        if not valores.get("carga"):
+                            sg.popup(f"é obrigatório cadastrar uma carga.", title="Campo obrigatório")
+                            break
                         if not valores.get(campo) or valores[campo].strip() == "":
                             sg.popup(f"O campo '{campo}' é obrigatório.", title="Campo obrigatório")
                             break
                     else:
-                        # Se passou por todos os campos: retorna
-                        valores["caminhoneiro"] = caminhoneiro_map.get(valores["caminhoneiro"])
-                        valores["caminhao"] = caminhao_map.get(valores["caminhao"])
-                        valores["carga"] = self.__carga_atual  # Inclui a carga atual nos valores retornados
-                        
+                        # Caminhoneiro
+                        if not valores.get("caminhoneiro") or valores["caminhoneiro"] == valores_padrao["caminhoneiro"]:
+                            valores["caminhoneiro"] = valores["caminhoneiro"] = frete.caminhoneiro  # mantém o objeto original do frete
+                        else:
+                            valores["caminhoneiro"] = caminhoneiro_map[valores["caminhoneiro"]]
+
+                        # Caminhão
+                        if not valores.get("caminhao") or valores["caminhao"] == valores_padrao["caminhao"]:
+                            valores["caminhao"] = frete.caminhao  # mantém o objeto original do frete
+                        else:
+                            valores["caminhao"] = caminhao_map[valores["caminhao"]]
+                       
                         # Converte a string da data e hora para objeto datetime
                         try:
                             data_hora = f"{valores['prazo_entrega']} {valores['hora_entrega']}"
@@ -292,12 +301,9 @@ class TelaCadastroFrete:
                 sg.popup("Implementação depois")
             
             elif evento == "add_carga":
-                # carga = self.controlador_carga.inclui_carga()
-                valores["carga"] = ""
-                break
-                
                 if self.__controlador_frete:
                     carga = self.__controlador_frete.abrir_cadastro_carga()
+                    print("Carga retornada:", carga)  # DEBUG
                     if carga:
                         self.__carga_atual = carga  # Atualiza a carga atual
                         self.atualizar_display_carga(carga)

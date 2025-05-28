@@ -14,7 +14,7 @@ class Carga:
         self.descricao = descricao.strip()
         self.quantidade = quantidade
         self.carga_perigosa = carga_perigosa
-
+        
     def __repr__(self):
         return (f"Carga(codigo='{self.codigo}', tipo='{self.tipo.value}', descricao='{self.descricao}', "
                 f"quantidade={self.quantidade}, carga_perigosa={self.carga_perigosa})")
