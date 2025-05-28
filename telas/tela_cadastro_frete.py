@@ -94,7 +94,6 @@ class TelaCadastroFrete:
         if not lista_cargas:
             return "Nenhuma carga disponível."
         
-        texto = "Cargas disponíveis:\n\n"
         for carga in lista_cargas:
             if carga.tipo == TipoCarga.LIQUIDA:
                 unidade = "L"
@@ -107,13 +106,11 @@ class TelaCadastroFrete:
             else:
                 unidade = ""
             
-            texto += f"Código: {carga.codigo}\n"
-            texto += f"Descrição: {carga.descricao}\n"
-            texto += f"Quantidade: {carga.quantidade} {unidade}\n"
-            texto += f"Tipo: {carga.tipo.name}\n"
-            texto += f"Perigosa: {'Sim' if carga.carga_perigosa else 'Não'}\n"
-            texto += "-" * 40 + "\n"
-        
+            texto = f"{carga.codigo} - {carga.descricao} - {carga.quantidade} {unidade}"            
+            if(carga.carga_perigosa):
+                texto += " (PERIGOSA)"
+            texto += "\n"
+
         return texto
 
     def pega_dados_frete(self, lista_caminhoneiros, lista_caminhoes, frete=None, modo_atualizacao_status=False):
