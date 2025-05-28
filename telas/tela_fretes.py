@@ -77,8 +77,10 @@ class TelaFrete:
                 self.__window.close()
                 return "cadastrar"
             elif evento.startswith("editar_"):
+                self.__window.close()
                 return {"acao": "editar", "id": int(evento.split("_")[1])}
             elif evento.startswith("excluir_"):
+                self.__window.close()
                 return {"acao": "excluir", "id": int(evento.split("_")[1])}
 
     def mostrar_mensagem(self, msg: str, titulo="Aviso"):

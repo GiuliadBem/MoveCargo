@@ -66,14 +66,6 @@ class Caminhoneiro(Pessoa):
         self.__num_cnh = num_cnh
 
     @property
-    def cat_cnh(self):
-        return self.__cat_cnh
-
-    @cat_cnh.setter
-    def cat_cnh(self, cat_cnh):
-        self.__cat_cnh = cat_cnh
-
-    @property
     def possui_MOPP(self):
         return self.__possui_MOPP
 
