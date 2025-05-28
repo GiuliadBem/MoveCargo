@@ -2,11 +2,13 @@ import FreeSimpleGUI as sg
 from enums.status import Status
 from enums.motivo_cancelamento import MotivoCancelamento
 from datetime import datetime
+#from controladores.controlador_carga import ControladorCarga --> isso aqui esta errado em um nivel
 
 class TelaCadastroFrete:
     def __init__(self):
         sg.theme("Reddit")
         self.__window = None  # Armazena a própria janela de cadastro de frete
+        # self.__controlador_carga = ControladorCarga(self)
 
     def __verificar_motivo_cancelamento(self, valores: dict) -> bool:
         """Verifica se o motivo do cancelamento foi informado quando necessário."""
@@ -81,7 +83,7 @@ class TelaCadastroFrete:
             # Status
             [sg.Text("Status:", size=(20, 1)), 
              sg.Combo(status_opcoes, default_value=valores_padrao["status"], 
-                     key="status", size=(18, 1), readonly=True, enable_events=True)],
+                     key="status", size=(18, 1), readonly=True, enable_events=True, disabled= not modo_atualizacao_status)],
             
             # Motivo do cancelamento (inicialmente invisível)
             [sg.Text("Motivo do Cancelamento:", size=(20, 1), key="motivo_label", visible=False),
@@ -149,7 +151,7 @@ class TelaCadastroFrete:
             elif evento in ("Cadastrar", "Atualizar", "Atualizar Status"):
                 # Valida campos obrigatórios apenas se não estiver no modo de atualização de status
                 if not modo_atualizacao_status:
-                    campos_obrigatorios = ["origem", "destino", "distancia", "status", "caminhoneiro", "caminhao", "prazo_entrega", "hora_entrega"]
+                    campos_obrigatorios = ["origem", "destino", "distancia", "status", "caminhoneiro", "caminhao", "prazo_entrega", "hora_entrega"] #COLOCAR CARGA POSTERIORMENTE
 
                     for campo in campos_obrigatorios:
                         if not valores.get(campo) or valores[campo].strip() == "":
@@ -194,8 +196,10 @@ class TelaCadastroFrete:
                     #self.__window["observacoes_display"].update("\n".join(self.__observacoes_adicionadas))
             
             elif evento == "add_carga":
-                sg.popup("Abrir formulário de carga separado aqui.")  # Aqui você pode chamar outra tela específica para Carga.
-
+                # carga = self.controlador_carga.inclui_carga()
+                valores["carga"] = ""
+                break
+                
     def formatar_resumo_carga(self, carga):
         if not carga:
             return "Nenhuma carga definida."

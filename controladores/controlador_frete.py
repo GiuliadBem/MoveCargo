@@ -29,8 +29,10 @@ class ControladorFrete:
         
         lista_caminhoes = self.__controlador_sistema.controlador_caminhao.lista_caminhoes
         lista_caminhoneiros = self.__controlador_sistema.controlador_caminhoneiro.lista_caminhoneiros
+        lista_caminhoes_livres = self.lista_caminhoes_livres(lista_caminhoes)
+        lista_caminhoneiros_livres = self.lista_caminhoneiros_livres(lista_caminhoneiros)
         
-        dados = self.__tela_cadastro_frete.pega_dados_frete(lista_caminhoneiros, lista_caminhoes)
+        dados = self.__tela_cadastro_frete.pega_dados_frete(lista_caminhoneiros_livres, lista_caminhoes_livres)
         
         if dados == None:
             self.__tela_frete.mostrar_mensagem("Cadastro cancelado.")
@@ -41,20 +43,20 @@ class ControladorFrete:
             while self.procura_frete_por_id(cria_id) is not None:
                 cria_id += 1
 
-            # Temporariamente, vamos usar uma carga vazia
-            carga = None  #carga = dados["carga"] #Carga(**dados["carga"])
+            # Temporariamente, vamos usar uma carga vazia e sem observacoes
+            carga = None  #carga = dados["carga"]
             observacoes = ""  # [Observacao(**obs) for obs in dados.get("observacoes", [])] 
             caminhao = dados["caminhao"]
             caminhoneiro = dados["caminhoneiro"]
 
-            # Validação de compatibilidade caminhão/carga - temporariamente desativada
-            #if carga.tipo != caminhao.tipo_carga:
-            #    self.__tela_frete.mostrar_mensagem("Erro: Caminhão incompatível com o tipo de carga.")
-            #    return
-
-            # Validação de carga perigosa - temporariamente desativada
-            #if carga.carga_perigosa and not caminhoneiro.possui_mopp:
-            #    self.__tela_frete.mostrar_mensagem("Erro: Caminhoneiro não possui licença MOPP para carga perigosa.")
+            #vef_carga = self.verifica_tipo_carga(carga, caminhao)
+            #if not vef_carga:
+             #   self.__tela_frete.mostrar_mensagem("Erro: Caminhão incompatível com o tipo de carga.")
+             #   return
+            
+           # vef_mopp = self.verifica_Mopp(carga, caminhoneiro)
+            #if not vef_mopp:
+              #  self.__tela_frete.mostrar_mensagem("Caminhoneiro não possui licença MOPP para carga perigosa.")
             #    return
 
             novo_frete = Frete(
@@ -85,41 +87,50 @@ class ControladorFrete:
         if not frete:
             self.__tela_frete.mostrar_mensagem("Frete não encontrado.")
             return
-
-        dados_atuais = {
-            "origem": frete.origem,
-            "destino": frete.destino,
-            "distancia": frete.distancia,
-            "status": frete.status,
-            "motivo_cancelamento": frete.motivo_cancelamento,
-        }
-
-        dados_permitidos = ["origem", "destino", "distancia", "status", "motivo_cancelamento"]
-
-        novos_dados = self.__tela_cadastro_frete.pega_dados_atualizacao(dados_atuais, dados_permitidos)
+    
+        lista_caminhoes = self.__controlador_sistema.controlador_caminhao.lista_caminhoes
+        lista_caminhoneiros = self.__controlador_sistema.controlador_caminhoneiro.lista_caminhoneiros
+        lista_caminhoes_livres = self.lista_caminhoes_livres(lista_caminhoes)
+        lista_caminhoneiros_livres = self.lista_caminhoneiros_livres(lista_caminhoneiros)
+        
+        novos_dados = self.__tela_cadastro_frete.pega_dados_frete(lista_caminhoneiros_livres, lista_caminhoes_livres, frete)
 
         if novos_dados is None:
             self.__tela_frete.mostrar_mensagem("Atualização cancelada.")
             return
 
         try:
-            # Validação de campos obrigatórios
-            for campo in ["origem", "destino", "distancia"]:
-                if campo in novos_dados and not novos_dados[campo]:
-                    self.__tela_frete.mostrar_mensagem(f"Erro: Campo '{campo}' não pode estar vazio.")
-                    return
+
+            # Temporariamente, vamos usar uma carga vazia e sem observacoes
+            carga = None  #carga = dados["carga"]
+            observacoes = ""  # [Observacao(**obs) for obs in dados.get("observacoes", [])] 
+            caminhao = novos_dados["caminhao"]
+            caminhoneiro = novos_dados["caminhoneiro"]
+
+
+            #vef_carga = self.verifica_tipo_carga(carga, caminhao)
+            #vef_capacidade = self.verifica_capacidade(carga, caminhao)
+            #if not vef_carga:
+            #    self.__tela_frete.mostrar_mensagem("Caminhão incompatível com o tipo de carga.")
+            #    return
+            #elif not vef_capacidade:
+            #    self.__tela_frete.mostrar_mensagem("Carga maior que capacidade do Caminhão")
+            #    return
+            
+           # vef_mopp = self.verifica_Mopp(carga, caminhoneiro)
+            #if not vef_mopp:
+            #    self.__tela_frete.mostrar_mensagem("Caminhoneiro não possui licença MOPP para carga perigosa.")
+            #    return
 
             frete.origem = novos_dados.get("origem", frete.origem)
             frete.destino = novos_dados.get("destino", frete.destino)
             frete.distancia = novos_dados.get("distancia", frete.distancia)
-            frete.status = novos_dados.get("status", frete.status)
-
-            if frete.status == Status.CANCELADO:
-                if not novos_dados.get("motivo_cancelamento"):
-                    self.__tela_frete.mostrar_mensagem("Erro: É obrigatório fornecer o motivo do cancelamento.")
-                    return
-                frete.motivo_cancelamento = novos_dados["motivo_cancelamento"]
-
+            frete.prazo_entrega = novos_dados.get("prazo_entrega", frete.distancia)
+            frete.caminhoneiro = caminhoneiro
+            frete.caminhao = caminhao
+            frete.carga = carga
+            frete.observacoes = observacoes
+               
             self.__frete_dao.update(frete)
             self.__tela_frete.mostrar_mensagem("Frete atualizado com sucesso!")
 
@@ -156,6 +167,52 @@ class ControladorFrete:
                 "prazo_entrega": frete.prazo_entrega
             })
         return dados_exibicao
+    
+    # Validação de compatibilidade caminhão/carga
+    def verifica_tipo_carga(self, carga, caminhao):
+        tipo_carga = carga.tipo_carga
+        tipo_carga_caminhao = caminhao.tipo_carga
+        
+        if tipo_carga != tipo_carga_caminhao:
+            return False
+        
+    # Validação de carga perigosa
+    def verifica_Mopp(self, carga, caminhoneiro):
+        caminhoneiro_mopp = caminhoneiro.possui_MOPP
+        
+        if carga.perigosa and not caminhoneiro_mopp: #Verificar qual será o metodo 
+            return False
+    
+    #Validação da capacidade
+    def verifica_capacidade(self, carga, caminhao):
+        if carga.quantidade > caminhao.capacidade:
+            return False
+    
+    def lista_caminhoneiros_livres(self, lista_caminhoneiro):
+        lista_caminhoneiros_livres = []
+        for c in lista_caminhoneiro:
+            id_caminhoneiro = c.id
+            frete_atual = None
+            for f in self.lista_fretes:
+                if f.caminhoneiro.id == id_caminhoneiro and f.status in [Status.NAO_INICIADO, Status.EM_ANDAMENTO, Status.SUSPENSO]:
+                    frete_atual = f
+            if frete_atual == None:
+                lista_caminhoneiros_livres.append(c)
+        return lista_caminhoneiros_livres
+    
+    def lista_caminhoes_livres(self, lista_caminhao):
+        lista_caminhoes_livres = []
+        for c in lista_caminhao:
+            id_caminhao = c.id
+            frete_atual = None
+            for f in self.lista_fretes:
+                if f.caminhao.id == id_caminhao and f.status in [Status.NAO_INICIADO, Status.EM_ANDAMENTO, Status.SUSPENSO]:
+                    frete_atual = f
+            if frete_atual == None:
+                lista_caminhoes_livres.append(c)
+        return lista_caminhoes_livres
+
+
 
     # -- Atualizar Status Frete ----------------------------------------------------------------------------------------------------------------------------------------------- #
     def listar_fretes_para_atualizacao_gerente(self):
