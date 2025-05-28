@@ -18,8 +18,107 @@ class TelaCadastroFrete:
         """Exibe mensagem de erro quando o motivo do cancelamento não foi informado."""
         sg.popup("É necessário informar o motivo do cancelamento!", title="Campo obrigatório")
 
+    def atualizar_display_carga(self, carga):
+        """Atualiza o display da carga na tela"""
+        if self.__window and carga:
+            self.__window["carga_display"].update(self.formatar_resumo_carga(carga))
+            self.__carga_atual = carga  # Armazena a carga atual
+
+    def mostrar_lista_cargas(self, lista_cargas):
+        """Mostra uma janela com a lista de cargas disponíveis para seleção"""
+        if not lista_cargas:
+            sg.popup("Não há cargas cadastradas.", title="Aviso")
+            return None
+
+        # Preparar dados para a tabela
+        dados_tabela = []
+        for carga in lista_cargas:
+            dados_tabela.append([
+                carga.codigo,
+                carga.descricao,
+                f"{carga.quantidade} {self.get_unidade_medida(carga.tipo)}",
+                carga.tipo.name,
+                "Sim" if carga.carga_perigosa else "Não"
+            ])
+
+        layout = [
+            [sg.Text('Selecione uma Carga', font=('Arial', 16, 'bold'))],
+            [sg.Table(
+                values=dados_tabela,
+                headings=['Código', 'Descrição', 'Quantidade', 'Tipo', 'Perigosa'],
+                display_row_numbers=False,
+                auto_size_columns=True,
+                num_rows=min(10, len(dados_tabela)),
+                key='-TABELA-',
+                enable_events=True,
+                select_mode=sg.TABLE_SELECT_MODE_BROWSE
+            )],
+            [sg.Button('Selecionar', key='selecionar', size=(10, 1)),
+             sg.Button('Nova Carga', key='nova_carga', size=(10, 1)),
+             sg.Button('Cancelar', key='cancelar', size=(10, 1))]
+        ]
+
+        window = sg.Window('Selecionar Carga', layout, modal=True, finalize=True)
+        
+        while True:
+            evento, valores = window.read()
+            
+            if evento in (sg.WINDOW_CLOSED, 'cancelar'):
+                window.close()
+                return None
+                
+            elif evento == 'nova_carga':
+                window.close()
+                return 'nova_carga'
+                
+            elif evento == 'selecionar' and valores['-TABELA-']:
+                indice_selecionado = valores['-TABELA-'][0]
+                carga_selecionada = lista_cargas[indice_selecionado]
+                window.close()
+                return carga_selecionada
+
+    def get_unidade_medida(self, tipo_carga):
+        """Retorna a unidade de medida baseada no tipo de carga"""
+        if tipo_carga == TipoCarga.LIQUIDA:
+            return "L"
+        elif tipo_carga == TipoCarga.SOLIDA:
+            return "Kg"
+        elif tipo_carga == TipoCarga.GASOSA:
+            return "M3"
+        elif tipo_carga == TipoCarga.VIVA:
+            return "Un"
+        return ""
+
+    def formatar_lista_cargas(self, lista_cargas):
+        """Formata a lista de cargas para exibição"""
+        if not lista_cargas:
+            return "Nenhuma carga disponível."
+        
+        texto = "Cargas disponíveis:\n\n"
+        for carga in lista_cargas:
+            if carga.tipo == TipoCarga.LIQUIDA:
+                unidade = "L"
+            elif carga.tipo == TipoCarga.SOLIDA:
+                unidade = "Kg"
+            elif carga.tipo == TipoCarga.GASOSA:
+                unidade = "M3"
+            elif carga.tipo == TipoCarga.VIVA:
+                unidade = "Un"
+            else:
+                unidade = ""
+            
+            texto += f"Código: {carga.codigo}\n"
+            texto += f"Descrição: {carga.descricao}\n"
+            texto += f"Quantidade: {carga.quantidade} {unidade}\n"
+            texto += f"Tipo: {carga.tipo.name}\n"
+            texto += f"Perigosa: {'Sim' if carga.carga_perigosa else 'Não'}\n"
+            texto += "-" * 40 + "\n"
+        
+        return texto
+
     def pega_dados_frete(self, lista_caminhoneiros, lista_caminhoes, frete=None, modo_atualizacao_status=False):
         observacoes_adicionadas = []
+        self.__carga_atual = frete.carga if frete else None  # Armazena a carga atual
         
         # Mapas auxiliares para vincular nome formatado → objeto
         caminhoneiro_map = {f"{c.id} - {c.nome}": c for c in lista_caminhoneiros}
@@ -30,6 +129,11 @@ class TelaCadastroFrete:
         status_opcoes = [s.name for s in Status]
         motivo_opcoes = [m.name for m in MotivoCancelamento]
 
+        # Obter lista de cargas disponíveis
+        lista_cargas = []
+        if self.__controlador_frete:
+            lista_cargas = self.__controlador_frete.obter_lista_cargas()
+
         valores_padrao = {
             "origem": frete.origem if frete else "",
             "destino": frete.destino if frete else "",
@@ -37,7 +141,7 @@ class TelaCadastroFrete:
             "status": frete.status.name if frete else status_opcoes[0],
             "caminhoneiro": f"{frete.caminhoneiro.id} - {frete.caminhoneiro.nome}" if frete else '',
             "caminhao": f"{frete.caminhao.id} - {frete.caminhao.modelo} ({frete.caminhao.placa})" if frete else '',
-            "carga": frete.carga.codigo if frete and frete.carga else None,
+            "carga": self.formatar_lista_cargas(lista_cargas) if lista_cargas else "Nenhuma carga disponível.",
             "motivo_cancelamento": frete.motivo_cancelamento.name if frete and frete.motivo_cancelamento else "",
             "prazo_entrega": frete.prazo_entrega.strftime("%d/%m/%Y %H:%M") if frete and frete.prazo_entrega else ""
         }
@@ -159,6 +263,7 @@ class TelaCadastroFrete:
                         # Se passou por todos os campos: retorna
                         valores["caminhoneiro"] = caminhoneiro_map.get(valores["caminhoneiro"])
                         valores["caminhao"] = caminhao_map.get(valores["caminhao"])
+                        valores["carga"] = self.__carga_atual  # Inclui a carga atual nos valores retornados
                         
                         # Converte a string da data e hora para objeto datetime
                         try:
@@ -191,8 +296,8 @@ class TelaCadastroFrete:
                 if self.__controlador_frete:
                     carga = self.__controlador_frete.abrir_cadastro_carga()
                     if carga:
-                        valores["carga"] = carga
-                        self.__window["carga_display"].update(self.formatar_resumo_carga(carga))
+                        self.__carga_atual = carga  # Atualiza a carga atual
+                        self.atualizar_display_carga(carga)
                 else:
                     sg.popup_error("Erro: Controlador de frete não inicializado")
 
