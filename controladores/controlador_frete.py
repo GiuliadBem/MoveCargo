@@ -11,7 +11,7 @@ class ControladorFrete:
     def __init__(self, controlador_sistema):
         self.__frete_dao = FreteDAO()
         self.__tela_frete = TelaFrete()
-        self.__tela_cadastro_frete = TelaCadastroFrete()
+        self.__tela_cadastro_frete = TelaCadastroFrete(self)
         self.__tela_atualizacao_status = TelaAtualizacaoStatus()
         self.__controlador_sistema = controlador_sistema
 
@@ -304,3 +304,12 @@ class ControladorFrete:
                 id_frete = opcao["id"]
                 self.atualizar_status_frete(id_frete)
     # ------------------------------------------------------------------------------------------------------------------------------------------------------------------- #
+
+    def abrir_cadastro_carga(self):
+        """Abre a tela de cadastro de carga e retorna a carga cadastrada"""
+        # Abre a tela de cadastro de carga
+        self.__controlador_sistema.controlador_carga.incluir_carga()
+        
+        # Retorna a última carga cadastrada (se houver)
+        cargas = self.__controlador_sistema.controlador_carga.lista_cargas
+        return cargas[-1] if cargas else None

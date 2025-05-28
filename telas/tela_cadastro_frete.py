@@ -4,9 +4,10 @@ from enums.motivo_cancelamento import MotivoCancelamento
 from datetime import datetime
 
 class TelaCadastroFrete:
-    def __init__(self):
+    def __init__(self, controlador_frete=None):
         sg.theme("Reddit")
         self.__window = None  # Armazena a própria janela de cadastro de frete
+        self.__controlador_frete = controlador_frete  # Referência ao controlador de frete
 
     def __verificar_motivo_cancelamento(self, valores: dict) -> bool:
         """Verifica se o motivo do cancelamento foi informado quando necessário."""
@@ -35,7 +36,7 @@ class TelaCadastroFrete:
             "status": frete.status.name if frete else status_opcoes[0],
             "caminhoneiro": f"{frete.caminhoneiro.id} - {frete.caminhoneiro.nome}" if frete else '',
             "caminhao": f"{frete.caminhao.id} - {frete.caminhao.modelo} ({frete.caminhao.placa})" if frete else '',
-            "carga": "",  # Pode ser um ID
+            "carga": "frete.carga.codigo",  # Pode ser um ID
             "motivo_cancelamento": frete.motivo_cancelamento.name if frete and frete.motivo_cancelamento else "",
             # -- Atualizar Status Frete --------------------------------------------------------------------------- #
             "prazo_entrega": frete.prazo_entrega.strftime("%d/%m/%Y %H:%M") if frete and frete.prazo_entrega else ""
@@ -194,8 +195,14 @@ class TelaCadastroFrete:
                     #self.__window["observacoes_display"].update("\n".join(self.__observacoes_adicionadas))
             
             elif evento == "add_carga":
-                sg.popup("Abrir formulário de carga separado aqui.")  # Aqui você pode chamar outra tela específica para Carga.
-
+                if self.__controlador_frete:
+                    carga = self.__controlador_frete.abrir_cadastro_carga()
+                    if carga:
+                        valores["carga"] = carga
+                        self.__window["carga_display"].update(self.formatar_resumo_carga(carga))
+                else:
+                    sg.popup_error("Erro: Controlador de frete não inicializado")
+            
     def formatar_resumo_carga(self, carga):
         if not carga:
             return "Nenhuma carga definida."
