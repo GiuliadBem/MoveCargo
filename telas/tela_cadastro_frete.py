@@ -228,6 +228,9 @@ class TelaCadastroFrete:
         if valores_padrao["status"] == "CANCELADO":
             self.__window["motivo_label"].update(visible=True)
             self.__window["motivo_cancelamento"].update(visible=True)
+        else:
+            self.__window["motivo_label"].update(visible=False)
+            self.__window["motivo_cancelamento"].update(visible=False)
 
         while True:
             evento, valores = self.__window.read()
@@ -286,7 +289,7 @@ class TelaCadastroFrete:
                 else:
                     # No modo de atualização de status, valida o motivo do cancelamento se necessário
                     motivo = self.__verificar_motivo_cancelamento(valores)
-                    
+
                     if not motivo:
                         self.__mostrar_erro_motivo_cancelamento()
                         continue
