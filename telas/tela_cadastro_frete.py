@@ -140,7 +140,6 @@ class TelaCadastroFrete:
         
         caminhoneiro_opcoes = list(caminhoneiro_map.keys())
         caminhao_opcoes = list(caminhao_map.keys())
-        
         # Definir opções de status baseado no modo e status atual
         if modo_atualizacao_status and frete:
             # No modo de atualização, mostrar apenas status válidos para transição
@@ -259,6 +258,9 @@ class TelaCadastroFrete:
         else:
             self.__window["motivo_label"].update(visible=False)
             self.__window["motivo_cancelamento"].update(visible=False)
+        
+        if frete:
+            self.atualizar_carga_na_interface(self.__window, self.__carga_atual, modo_atualizacao_status)
 
         while True:
             evento, valores = self.__window.read()

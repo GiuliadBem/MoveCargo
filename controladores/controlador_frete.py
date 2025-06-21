@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from telas.tela_fretes import TelaFrete
 from telas.tela_cadastro_frete import TelaCadastroFrete
 from telas.tela_atualizacao_status import TelaAtualizacaoStatus
@@ -47,6 +49,12 @@ class ControladorFrete:
             observacoes = ""  # [Observacao(**obs) for obs in dados.get("observacoes", [])] 
             caminhao = dados["caminhao"]
             caminhoneiro = dados["caminhoneiro"]
+            data = dados["prazo_entrega"]
+
+            vef_data = self.verifica_data(data)
+            if not vef_data:
+                self.__tela_frete.mostrar_mensagem("Data não deve ser inferior ao dia de hoje")
+                return
 
             vef_carga = self.verifica_tipo_carga(carga, caminhao)
             print(vef_carga)
@@ -75,7 +83,7 @@ class ControladorFrete:
                 caminhoneiro=caminhoneiro,
                 caminhao=caminhao,
                 carga=carga,
-                prazo_entrega=dados["prazo_entrega"]
+                prazo_entrega=data
             )
 
             self.__frete_dao.add(novo_frete)
@@ -104,12 +112,17 @@ class ControladorFrete:
 
         try:
 
-            # Temporariamente, vamos usar uma carga vazia e sem observacoes
-            carga = None  #carga = dados["carga"]
+            # Temporariamente sem observacoes
+            carga = novos_dados.get("carga", frete.carga)
             observacoes = ""  # [Observacao(**obs) for obs in dados.get("observacoes", [])] 
-            caminhao = novos_dados["caminhao"]
-            caminhoneiro = novos_dados["caminhoneiro"]
+            caminhao = novos_dados.get("caminhao", frete.caminhao)
+            caminhoneiro = novos_dados.get("caminhoneiro", frete.caminhoneiro)
+            data = novos_dados.get("prazo_entrega", frete.prazo_entrega)
 
+            vef_data = self.verifica_data(data)
+            if not vef_data:
+                self.__tela_frete.mostrar_mensagem("Data não deve ser inferior ao dia de hoje")
+                return
 
             vef_carga = self.verifica_tipo_carga(carga, caminhao)
             vef_capacidade = self.verifica_capacidade(carga, caminhao)
@@ -128,9 +141,9 @@ class ControladorFrete:
             frete.origem = novos_dados.get("origem", frete.origem)
             frete.destino = novos_dados.get("destino", frete.destino)
             frete.distancia = novos_dados.get("distancia", frete.distancia)
-            frete.prazo_entrega = novos_dados.get("prazo_entrega", frete.distancia)
-            frete.caminhoneiro = novos_dados.get("caminhoneiro", frete.caminhoneiro)
-            frete.caminhao = novos_dados.get("caminhao", frete.caminhao)
+            frete.prazo_entrega = data
+            frete.caminhoneiro = caminhoneiro
+            frete.caminhao = caminhao
             frete.carga = carga
             frete.observacoes = observacoes
                
@@ -196,6 +209,16 @@ class ControladorFrete:
             return False
         else:
             return True
+        
+    #Validação de Data
+    def verifica_data(self, dataFrete):
+        dataAtual = datetime.now()
+
+        if dataFrete < dataAtual:
+            return False
+        else:
+            return True
+        
     
     def lista_caminhoneiros_livres(self, lista_caminhoneiro):
         lista_caminhoneiros_livres = []
