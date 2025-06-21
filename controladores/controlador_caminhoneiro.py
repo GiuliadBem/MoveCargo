@@ -35,12 +35,25 @@ class ControladorCaminhoneiro:
             cria_id = len(self.lista_caminhoneiros) 
             while self.procura_caminhoneiro_por_id(cria_id) is not None:
                 cria_id += 1
+            
+            cpfCadastro = dados["cpf"]
+            usuarioCadastro = dados["usuario"]
+            
+            vef_cpf = self.procura_cpf(cpfCadastro)
+            if vef_cpf != None:
+                self.__tela_caminhoneiro.mostrar_mensagem('CPF já cadastrado')
+                return
+            
+            vef_usuario = self.procura_usuario(usuarioCadastro)
+            if vef_usuario != None:
+                self.__tela_caminhoneiro.mostrar_mensagem('Nome de usuario já cadastrado')
+                return
 
             novo_caminhoneiro = Caminhoneiro(
-                usuario=dados["usuario"],
+                usuario= usuarioCadastro,
                 senha=dados["senha"],
                 nome=dados["nome"],
-                cpf=dados["cpf"],
+                cpf= cpfCadastro,
                 data_nascimento = dados["data_nascimento"],
                 telefone=dados["telefone"],
                 email=dados["email"],
@@ -209,3 +222,16 @@ class ControladorCaminhoneiro:
 
         except Exception as e:
             self.__tela_caminhoneiro.mostrar_mensagem(f"Erro ao atualizar cadastro: {e}")
+
+    
+    def procura_cpf(self, cpf):
+        for caminhoneiro in self.lista_caminhoneiros:
+            if caminhoneiro.cpf == cpf:
+                return caminhoneiro
+        return None
+    
+    def procura_usuario(self, usuario):
+        for caminhoneiro in self.lista_caminhoneiros:
+            if caminhoneiro.usuario == usuario:
+                return caminhoneiro
+        return None

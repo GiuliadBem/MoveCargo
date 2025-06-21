@@ -16,7 +16,6 @@ class Caminhoneiro(Pessoa):
         self.__num_cnh = num_cnh
         self.__possui_MOPP = possui_MOPP
         self.__data_nascimento = data_nascimento
-        self.__freteAtual = None
 
 
     # Getters e Setters
@@ -73,14 +72,6 @@ class Caminhoneiro(Pessoa):
     def possui_MOPP(self, possui_MOPP):
         self.__possui_MOPP = possui_MOPP
 
-    @property
-    def freteAtual(self):
-        return self.__freteAtual
-
-    @freteAtual.setter
-    def freteAtual(self, freteAtual):
-        self.__freteAtual = freteAtual
-    
     @property
     def data_nascimento(self):
         return self.__data_nascimento
