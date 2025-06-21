@@ -18,6 +18,42 @@ class TelaCadastroFrete:
         """Exibe mensagem de erro quando o motivo do cancelamento não foi informado."""
         sg.popup("É necessário informar o motivo do cancelamento!", title="Campo obrigatório")
 
+    def __obter_status_validos_para_transicao(self, status_atual):
+        """
+        Retorna a lista de status válidos para transição a partir do status atual.
+        Evita importação circular com o controlador.
+        """
+        from enums.status import Status
+        
+        transicoes_permitidas = {
+            Status.NAO_INICIADO: [Status.EM_ANDAMENTO, Status.CANCELADO],
+            Status.EM_ANDAMENTO: [Status.SUSPENSO, Status.CONCLUIDO, Status.CANCELADO],
+            Status.SUSPENSO: [Status.EM_ANDAMENTO, Status.CANCELADO],
+            Status.CONCLUIDO: [],
+            Status.CANCELADO: []
+        }
+        
+        return transicoes_permitidas.get(status_atual, [])
+
+    def __validar_transicao_status(self, status_atual, novo_status):
+        """
+        Valida se a transição de status é permitida.
+        Retorna (é_válido, mensagem_erro)
+        """
+        from enums.status import Status
+        from datetime import datetime
+        
+        # Verificar se é uma transição válida
+        status_validos = self.__obter_status_validos_para_transicao(status_atual)
+        if novo_status not in status_validos:
+            return False, f"Transição de '{status_atual.value}' para '{novo_status.value}' não é permitida."
+        
+        # Verificar se o frete não está em estado final
+        if status_atual in [Status.CONCLUIDO, Status.CANCELADO]:
+            return False, f"Frete já está {status_atual.value.lower()}. Não é possível alterar o status."
+        
+        return True, ""
+
     def atualizar_display_carga(self, carga):
         """Atualiza o display da carga na tela"""
         if self.__window and carga:
@@ -123,7 +159,23 @@ class TelaCadastroFrete:
         
         caminhoneiro_opcoes = list(caminhoneiro_map.keys())
         caminhao_opcoes = list(caminhao_map.keys())
-        status_opcoes = [s.name for s in Status]
+        
+        # Definir opções de status baseado no modo e status atual
+        if modo_atualizacao_status and frete:
+            # No modo de atualização, mostrar apenas status válidos para transição
+            status_validos = self.__obter_status_validos_para_transicao(frete.status)
+            status_opcoes = [s.name for s in status_validos]
+            
+            # Se não há transições válidas, mostrar mensagem
+            if not status_opcoes:
+                sg.popup(f"Este frete está {frete.status.value.lower()}. Não é possível alterar o status.", 
+                        title="Status Final")
+                return None
+        else:
+            # No modo de cadastro, mostrar todos os status
+            from enums.status import Status
+            status_opcoes = [s.name for s in Status]
+        
         motivo_opcoes = [m.name for m in MotivoCancelamento]
 
         # Obter lista de cargas disponíveis
@@ -293,6 +345,16 @@ class TelaCadastroFrete:
                     if not motivo:
                         self.__mostrar_erro_motivo_cancelamento()
                         continue
+                    
+                    # Validar se o status selecionado é válido para transição
+                    if frete and valores["status"] != frete.status.name:
+                        from enums.status import Status
+                        novo_status = Status[valores["status"]]
+                        eh_valido, mensagem_erro = self.__validar_transicao_status(frete.status, novo_status)
+                        
+                        if not eh_valido:
+                            sg.popup(mensagem_erro, title="Transição Inválida")
+                            continue
                     
                     # Se passou pela validação, retorna os valores
                     valores["caminhoneiro"] = caminhoneiro_map.get(valores["caminhoneiro"])
