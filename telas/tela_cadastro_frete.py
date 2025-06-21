@@ -369,3 +369,4 @@ class TelaCadastroFrete:
         if self.__window:
             self.__window.close()
             self.__window = None
+   
