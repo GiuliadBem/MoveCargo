@@ -54,19 +54,23 @@ class TelaCadastroFrete:
         
         return True, ""
 
-    def atualizar_display_carga(self, carga):
-        """Atualiza o display da carga na tela"""
-        if self.__window and carga:
-            self.__window["carga_display"].update(self.formatar_resumo_carga(carga))
-            self.__carga_atual = carga  # Armazena a carga atual
+    def atualizar_carga_na_interface(self, janela: sg.Window, carga, modo_atualizacao_status: bool):
+        """Atualiza a exibição da carga na interface."""
+        self.__carga_atual = carga
+        if carga:
+            texto = (
+                f"Código: {carga.codigo}\n"
+                f"Tipo: {carga.tipo.name}\n"
+                f"Descrição: {carga.descricao}\n"
+                f"Quantidade: {carga.quantidade}\n"
+                f"Perigosa: {'Sim' if carga.carga_perigosa else 'Não'}"
+            )
+        else:
+            texto = "Nenhuma carga cadastrada."
 
-    def mostrar_lista_cargas(self, lista_cargas):
-        """Mostra uma janela com a lista de cargas disponíveis para seleção"""
-        if not lista_cargas:
-            sg.popup("Não há cargas cadastradas.", title="Aviso")
-            return None
+        janela["carga_display"].update(value=texto)
 
-        # Preparar dados para a tabela
+        '''
         dados_tabela = []
         for carga in lista_cargas:
             dados_tabela.append([
@@ -112,7 +116,7 @@ class TelaCadastroFrete:
                 carga_selecionada = lista_cargas[indice_selecionado]
                 window.close()
                 return carga_selecionada
-
+        '''
     def get_unidade_medida(self, tipo_carga):
         """Retorna a unidade de medida baseada no tipo de carga"""
         if tipo_carga == TipoCarga.LIQUIDA:
@@ -125,29 +129,6 @@ class TelaCadastroFrete:
             return "Un"
         return ""
 
-    def formatar_lista_cargas(self, lista_cargas):
-        """Formata a lista de cargas para exibição"""
-        if not lista_cargas:
-            return "Nenhuma carga disponível."
-        
-        for carga in lista_cargas:
-            if carga.tipo == TipoCarga.LIQUIDA:
-                unidade = "L"
-            elif carga.tipo == TipoCarga.SOLIDA:
-                unidade = "Kg"
-            elif carga.tipo == TipoCarga.GASOSA:
-                unidade = "M3"
-            elif carga.tipo == TipoCarga.VIVA:
-                unidade = "Un"
-            else:
-                unidade = ""
-            
-            texto = f"{carga.codigo} - {carga.descricao} - {carga.quantidade} {unidade}"            
-            if(carga.carga_perigosa):
-                texto += " (PERIGOSA)"
-            texto += "\n"
-
-        return texto
 
     def pega_dados_frete(self, lista_caminhoneiros, lista_caminhoes, frete=None, modo_atualizacao_status=False):
         observacoes_adicionadas = []
@@ -178,10 +159,6 @@ class TelaCadastroFrete:
         
         motivo_opcoes = [m.name for m in MotivoCancelamento]
 
-        # Obter lista de cargas disponíveis
-        lista_cargas = []
-        if self.__controlador_frete:
-            lista_cargas = self.__controlador_frete.obter_lista_cargas()
 
         valores_padrao = {
             "origem": frete.origem if frete else "",
@@ -190,7 +167,7 @@ class TelaCadastroFrete:
             "status": frete.status.name if frete else status_opcoes[0],
             "caminhoneiro": f"{frete.caminhoneiro.id} - {frete.caminhoneiro.nome}" if frete else '',
             "caminhao": f"{frete.caminhao.id} - {frete.caminhao.modelo} ({frete.caminhao.placa})" if frete else '',
-            "carga": self.formatar_lista_cargas(lista_cargas) if lista_cargas else "Nenhuma carga disponível.",
+            "carga":  frete.carga if frete else "Nenhuma carga cadastrada",
             "motivo_cancelamento": frete.motivo_cancelamento.name if frete and frete.motivo_cancelamento else "",
             "prazo_entrega": frete.prazo_entrega.strftime("%d/%m/%Y %H:%M") if frete and frete.prazo_entrega else ""
         }
@@ -220,11 +197,10 @@ class TelaCadastroFrete:
                          text_color="gray" if modo_atualizacao_status else None,
                          disabled=modo_atualizacao_status)],
             
-            [sg.Text("Carga:", size=(20, 1)),
-             sg.Multiline(default_text=valores_padrao["carga"], size=(40, 4), 
-                         text_color="gray" if modo_atualizacao_status else None,
-                         disabled=True, key="carga_display"),
-             sg.Button("ADICIONAR CARGA", key="add_carga", size=(15, 1), disabled=modo_atualizacao_status)],
+            [sg.Text("Carga:", size=(20, 1))],
+            [sg.Multiline("", size=(70, 2), key="carga_display", disabled=True, no_scrollbar=True)],
+            [sg.Button("ADICIONAR CARGA", key="add_carga", size=(20, 1), disabled=modo_atualizacao_status),
+            sg.Button("Excluir", key="excluir_carga", size=(10, 1), disabled=modo_atualizacao_status)],
             
             [sg.Text("Distância (km):", size=(20, 1)), 
              sg.InputText(key="distancia", default_text=str(valores_padrao["distancia"]), 
@@ -369,9 +345,8 @@ class TelaCadastroFrete:
                 if self.__controlador_frete:
                     carga = self.__controlador_frete.abrir_cadastro_carga()
                     print("Carga retornada:", carga)  # DEBUG
-                    if carga:
-                        self.__carga_atual = carga  # Atualiza a carga atual
-                        self.atualizar_display_carga(carga)
+                if carga:
+                    self.atualizar_carga_na_interface(self.__window, carga, modo_atualizacao_status)
                 else:
                     sg.popup_error("Erro: Controlador de frete não inicializado")
 

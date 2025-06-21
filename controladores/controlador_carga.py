@@ -20,7 +20,6 @@ class ControladorCarga:
         return self.__carga_dao.get(codigo)
 
     def incluir_carga(self):
-        """Inclui uma nova carga no sistema."""
         try:
             dados = self.__tela_cadastro_carga.pega_dados_carga()
             if not dados:
@@ -44,6 +43,7 @@ class ControladorCarga:
             try:
                 self.__carga_dao.add(carga)
                 self.__tela_cadastro_carga.mostrar_mensagem("Carga cadastrada com sucesso!", tipo="sucesso")
+                return carga
             except Exception as e:
                 self.__tela_cadastro_carga.mostrar_mensagem(f"Erro ao salvar a carga: {str(e)}", tipo="erro")
                 
