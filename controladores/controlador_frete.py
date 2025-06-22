@@ -20,7 +20,7 @@ class ControladorFrete:
     @property
     def lista_fretes(self):
         return self.__frete_dao.get_all()
-
+  
     def procura_frete_por_id(self, id):
         for frete in self.lista_fretes:
             if frete.id == id:
@@ -197,8 +197,9 @@ class ControladorFrete:
     # Validação de carga perigosa
     def verifica_Mopp(self, carga, caminhoneiro):
         caminhoneiro_mopp = caminhoneiro.possui_MOPP
+        carga_perigosa = carga.carga_perigosa
         
-        if carga.carga_perigosa and not caminhoneiro_mopp:
+        if carga_perigosa and not caminhoneiro_mopp:
             return False
         else:
             return True
