@@ -238,13 +238,11 @@ class TelaCadastroFrete:
                 if not modo_atualizacao_status:
                     campos_obrigatorios = ["origem", "destino", "distancia", "status", "caminhoneiro","caminhao","prazo_entrega", "hora_entrega"] 
 
-                    for campo in campos_obrigatorios:
-                        if not valores.get("carga"):
-                            sg.popup(f"é obrigatório cadastrar uma carga.", title="Campo obrigatório")
-                            break
-                        if not valores.get(campo) or valores[campo].strip() == "":
-                            sg.popup(f"O campo '{campo}' é obrigatório.", title="Campo obrigatório")
-                            break
+                    vef_campos = self.verificar_campos(valores, campos_obrigatorios)
+                    print(valores)  
+                    if vef_campos:
+                        sg.popup(vef_campos, title="Campo obrigatório")
+                        continue
                     else:
                         # Caminhoneiro
                         if not valores.get("caminhoneiro") or valores["caminhoneiro"] == valores_padrao["caminhoneiro"]:
@@ -315,6 +313,16 @@ class TelaCadastroFrete:
                     if resposta == "Sim":
                         self.__carga_atual = None
                         self.atualizar_carga_na_interface(self.__window, None, modo_atualizacao_status)
+    
+    def verificar_campos(self,valores, campos_obrigatorios):
+        for campo in campos_obrigatorios:
+            if not valores.get("carga"):
+                mensagem = "é obrigatório cadastrar uma carga."
+                return mensagem
+            if not valores.get(campo) or valores[campo].strip() == "":
+                mensagem = f"O campo '{campo}' é obrigatório."
+                return mensagem
+        return None
 
     def formatar_resumo_carga(self, carga):
         if not carga:
