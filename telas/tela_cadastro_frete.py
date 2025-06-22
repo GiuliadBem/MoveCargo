@@ -304,6 +304,18 @@ class TelaCadastroFrete:
                 else:
                     sg.popup_error("Erro: Controlador de frete não inicializado")
 
+            elif evento == "excluir_carga":
+                # Confirmação antes de excluir a carga, com código e botões em português
+                if self.__carga_atual:
+                    resposta = sg.popup(
+                        f"Tem certeza que deseja excluir a carga com o código {self.__carga_atual.codigo}?",
+                        title="Confirmar Exclusão",
+                        custom_text=("Sim", "Não")
+                    )
+                    if resposta == "Sim":
+                        self.__carga_atual = None
+                        self.atualizar_carga_na_interface(self.__window, None, modo_atualizacao_status)
+
     def formatar_resumo_carga(self, carga):
         if not carga:
             return "Nenhuma carga definida."
