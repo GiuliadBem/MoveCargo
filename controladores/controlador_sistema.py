@@ -94,5 +94,4 @@ class ControladorSistema:
                 case "Notificações": self.__controlador_notificacoes.listar_notificacoes(self.sessao.usuario_atual)
                 case "Sair": return
 
-    def abre_tela_cargas(self):
-        self.__controlador_carga.opcoes_carga()
+    # Remover método abre_tela_cargas, pois não existe mais a tela de cargas.

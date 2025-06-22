@@ -9,9 +9,6 @@ class CargaDAO(DAO):
     def add(self, carga: Carga):
         super().add(carga.codigo, carga)
 
-    def update(self, carga: Carga):
-        super().update(carga.codigo, carga)
-
     def get(self, codigo: str):
         return super().get(codigo)
     
