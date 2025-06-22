@@ -55,68 +55,20 @@ class TelaCadastroFrete:
         return True, ""
 
     def atualizar_carga_na_interface(self, janela: sg.Window, carga, modo_atualizacao_status: bool):
-        """Atualiza a exibição da carga na interface."""
+        """Atualiza a exibição da carga na interface, mostrando todos os atributos de forma compacta (até 2 linhas)."""
         self.__carga_atual = carga
         if carga:
+            unidade = self.get_unidade_medida(carga.tipo)
             texto = (
-                f"Código: {carga.codigo}\n"
-                f"Tipo: {carga.tipo.name}\n"
-                f"Descrição: {carga.descricao}\n"
-                f"Quantidade: {carga.quantidade}\n"
-                f"Perigosa: {'Sim' if carga.carga_perigosa else 'Não'}"
+                f"Código: {carga.codigo} | Tipo: {carga.tipo.name} ({carga.tipo.value}) | Desc: {carga.descricao} | "
+                f"Qtde: {carga.quantidade} {unidade} | Perigosa: {'Sim' if carga.carga_perigosa else 'Não'}"
             )
         else:
             texto = "Nenhuma carga cadastrada."
 
-        janela["carga_display"].update(value=texto)
+        if janela is not None and "carga_display" in janela.AllKeysDict:
+            janela["carga_display"].update(value=texto)
 
-        '''
-        dados_tabela = []
-        for carga in lista_cargas:
-            dados_tabela.append([
-                carga.codigo,
-                carga.descricao,
-                f"{carga.quantidade} {self.get_unidade_medida(carga.tipo)}",
-                carga.tipo.name,
-                "Sim" if carga.carga_perigosa else "Não"
-            ])
-
-        layout = [
-            [sg.Text('Selecione uma Carga', font=('Arial', 16, 'bold'))],
-            [sg.Table(
-                values=dados_tabela,
-                headings=['Código', 'Descrição', 'Quantidade', 'Tipo', 'Perigosa'],
-                display_row_numbers=False,
-                auto_size_columns=True,
-                num_rows=min(10, len(dados_tabela)),
-                key='-TABELA-',
-                enable_events=True,
-                select_mode=sg.TABLE_SELECT_MODE_BROWSE
-            )],
-            [sg.Button('Selecionar', key='selecionar', size=(10, 1)),
-             sg.Button('Nova Carga', key='nova_carga', size=(10, 1)),
-             sg.Button('Cancelar', key='cancelar', size=(10, 1))]
-        ]
-
-        window = sg.Window('Selecionar Carga', layout, modal=True, finalize=True)
-        
-        while True:
-            evento, valores = window.read()
-            
-            if evento in (sg.WINDOW_CLOSED, 'cancelar'):
-                window.close()
-                return None
-                
-            elif evento == 'nova_carga':
-                window.close()
-                return 'nova_carga'
-                
-            elif evento == 'selecionar' and valores['-TABELA-']:
-                indice_selecionado = valores['-TABELA-'][0]
-                carga_selecionada = lista_cargas[indice_selecionado]
-                window.close()
-                return carga_selecionada
-        '''
     def get_unidade_medida(self, tipo_carga):
         """Retorna a unidade de medida baseada no tipo de carga"""
         if tipo_carga == TipoCarga.LIQUIDA:
