@@ -336,6 +336,23 @@ class ControladorFrete:
         self.__frete_dao.update(frete)
         self.__tela_frete.mostrar_mensagem("Status atualizado com sucesso!")
 
+    def status_cancelado(self, status):
+        return status == Status.CANCELADO
+
+    def verificar_motivo_cancelamento(self, motivo):
+        if not motivo or motivo.strip() == "":
+            self.__tela_frete.mostrar_mensagem("É obrigatório fornecer o motivo do cancelamento.")
+            return False
+        return True
+
+    def pode_atualizar_frete(self, frete, dados_frete):
+        # Validação para status cancelado
+        if self.status_cancelado(Status[dados_frete["status"]]):
+            if not self.verificar_motivo_cancelamento(dados_frete.get("motivo_cancelamento", "")):
+                return False
+        # Outras validações podem ser adicionadas aqui
+        return True
+
     def atualizar_status_frete_gerente(self, id_frete):
         frete = self.procura_frete_por_id(id_frete)
         if not frete:
@@ -351,18 +368,14 @@ class ControladorFrete:
         if not dados_frete:
             return
 
-        # Atualizar status
         frete.status = Status[dados_frete["status"]]
-        
-        # Se o status for CANCELADO, salvar o motivo
-        if frete.status == Status.CANCELADO:
-            frete.motivo_cancelamento = dados_frete["motivo_cancelamento"]
 
-        # Salvar as alterações no arquivo
-        self.__frete_dao.update(frete)
-        
-        self.__tela_frete.mostrar_mensagem("Status atualizado com sucesso!")
-        return frete
+        if self.pode_atualizar_frete(frete, dados_frete):
+            self.__frete_dao.update(frete)
+            self.__tela_frete.mostrar_mensagem("Status atualizado com sucesso!")
+            return frete
+        else:
+            return
 
     def listar_meus_fretes(self, id_caminhoneiro):
         dados_exibicao = []
