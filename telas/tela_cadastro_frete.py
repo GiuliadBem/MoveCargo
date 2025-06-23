@@ -299,8 +299,6 @@ class TelaCadastroFrete:
                     print("Carga retornada:", carga)  # DEBUG
                 if carga:
                     self.atualizar_carga_na_interface(self.__window, carga, modo_atualizacao_status)
-                else:
-                    sg.popup_error("Erro: Controlador de frete não inicializado")
 
             elif evento == "excluir_carga":
                 # Confirmação antes de excluir a carga, com código e botões em português
