@@ -348,8 +348,12 @@ class ControladorFrete:
     def pode_atualizar_frete(self, frete, dados_frete):
         # Validação para status cancelado
         if self.status_cancelado(Status[dados_frete["status"]]):
-            if not self.verificar_motivo_cancelamento(dados_frete.get("motivo_cancelamento", "")):
+            motivo = dados_frete.get("motivo_cancelamento", "")
+            if not self.verificar_motivo_cancelamento(motivo):
                 return False
+            frete.motivo_cancelamento = MotivoCancelamento[motivo] if motivo else None
+        else:
+            frete.motivo_cancelamento = None
         # Outras validações podem ser adicionadas aqui
         return True
 
